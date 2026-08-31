@@ -1,283 +1,923 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Keuangan Pribadi • Dashboard</title>
+
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-    <!-- Google Font (Inter) -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet" />
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    >
+
+    <!-- Google Font -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap"
+        rel="stylesheet"
+    >
+
     <!-- CSS -->
-    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/style.css">
 </head>
+
 <body>
 
-    <!-- ============================================================ -->
-    <!-- SIDEBAR -->
-    <!-- ============================================================ -->
-    <aside class="sidebar" id="sidebar">
-        <div class="logo">K<span>.</span></div>
-        <nav class="nav-icons">
-            <a href="#" class="active" data-page="dashboard"><i class="fas fa-th-large"></i></a>
-            <a href="#" data-page="transaksi"><i class="fas fa-receipt"></i></a>
-            <a href="#" data-page="target"><i class="fas fa-bullseye"></i></a>
-            <a href="#" data-page="laporan"><i class="fas fa-chart-pie"></i></a>
-        </nav>
-        <div class="avatar-bottom" id="avatarUser">S</div>
-    </aside>
+<!-- ============================================================
+     SIDEBAR
+============================================================ -->
+<aside class="sidebar" id="sidebar">
 
-    <!-- ============================================================ -->
-    <!-- MAIN CONTENT -->
-    <!-- ============================================================ -->
-    <main class="main-content" id="mainContent">
-
-        <!-- ===================== HEADER ===================== -->
-        <header class="header">
-            <div class="header-left">
-                <h2 id="greeting">Welcome Back, <span id="userName">Saya</span></h2>
-                <p id="dateRange"><i class="far fa-calendar-alt"></i> <span id="rangeText">Bulan ini</span></p>
-            </div>
-            <div class="header-right">
-                <button class="btn-filter" id="btnFilterPeriod">
-                    <i class="fas fa-calendar"></i> Bulan ini
-                </button>
-                <button class="btn-add" id="btnTambahTransaksi">
-                    <i class="fas fa-plus"></i> Tambah
-                </button>
-            </div>
-        </header>
-
-        <!-- ===================== DASHBOARD ===================== -->
-        <section id="pageDashboard" class="page-section active">
-
-            <!-- CARDS ROW -->
-            <div class="cards-row">
-                <!-- Saldo Utama -->
-                <div class="card-primary">
-                    <div class="card-label">
-                        <span>Total Saldo</span>
-                        <span class="badge" id="saldoBadge"><i class="fas fa-arrow-up"></i> +0%</span>
-                    </div>
-                    <div class="card-amount" id="totalSaldo">Rp 0</div>
-                    <div class="card-footer">
-                        <span class="visa">💳 <span id="cardName">Kartu Utama</span></span>
-                        <span id="cardExpiry">EXP 12/28</span>
-                        <span class="trend-up" id="trendSaldo"><i class="fas fa-arrow-up"></i> 0%</span>
-                    </div>
-                </div>
-
-                <!-- Pemasukan Bulan Ini -->
-                <div class="card-secondary">
-                    <div class="label"><i class="fas fa-arrow-up" style="color:#00d4aa;"></i> Pemasukan</div>
-                    <div class="value" id="totalPemasukan">Rp 0</div>
-                    <div class="sub" id="jmlPemasukan">0 transaksi</div>
-                    <div class="mini-chart" id="chartPemasukan">
-                        <span></span><span></span><span></span><span></span>
-                        <span></span><span></span><span></span>
-                    </div>
-                </div>
-
-                <!-- Pengeluaran Bulan Ini -->
-                <div class="card-secondary">
-                    <div class="label"><i class="fas fa-arrow-down" style="color:#ff6b6b;"></i> Pengeluaran</div>
-                    <div class="value" id="totalPengeluaran">Rp 0</div>
-                    <div class="sub" id="jmlPengeluaran">0 transaksi</div>
-                    <div class="mini-chart" id="chartPengeluaran">
-                        <span></span><span></span><span></span><span></span>
-                        <span></span><span></span><span></span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- MIDDLE ROW : Grafik + Target -->
-            <div class="middle-row">
-                <!-- Grafik Kategori -->
-                <div class="stat-card">
-                    <div class="head">
-                        <span>Pengeluaran per Kategori</span>
-                        <span class="change" id="kategoriTeratas">Makanan</span>
-                    </div>
-                    <div id="kategoriChart" class="kategori-chart">
-                        <!-- diisi JS -->
-                    </div>
-                </div>
-
-                <!-- Target Tabungan -->
-                <div class="stat-card">
-                    <div class="head">
-                        <span>🎯 Target Tabungan</span>
-                        <span class="change" id="targetStatus">0%</span>
-                    </div>
-                    <div class="big-number" id="targetNominal">Rp 0</div>
-                    <div class="desc" id="targetDesc">dari Rp 0</div>
-                    <div class="progress-container">
-                        <div class="progress-bar" id="targetProgress" style="width:0%;"></div>
-                    </div>
-                    <div style="display:flex; justify-content:flex-end; margin-top:6px;">
-                        <button class="btn-edit-target" id="btnEditTarget"><i class="fas fa-pen"></i> Atur Target</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- RIWAYAT TRANSAKSI -->
-            <div class="history-section">
-                <div class="history-header">
-                    <h3>📋 Riwayat Transaksi</h3>
-                    <div style="display:flex; gap:8px; align-items:center;">
-                        <select id="filterKategori" class="filter-select">
-                            <option value="semua">Semua Kategori</option>
-                            <option value="Makanan">🍔 Makanan</option>
-                            <option value="Transport">🚗 Transport</option>
-                            <option value="Belanja">🛍️ Belanja</option>
-                            <option value="Tagihan">📄 Tagihan</option>
-                            <option value="Hiburan">🎬 Hiburan</option>
-                            <option value="Kesehatan">💊 Kesehatan</option>
-                            <option value="Pendidikan">📚 Pendidikan</option>
-                            <option value="Pemasukan">💰 Pemasukan</option>
-                            <option value="Lainnya">🔹 Lainnya</option>
-                        </select>
-                        <span id="jmlRiwayat" style="color:#6a7f99;font-size:13px;">0 transaksi</span>
-                    </div>
-                </div>
-                <div class="history-table" id="historyTable">
-                    <!-- diisi JS -->
-                </div>
-            </div>
-
-        </section>
-
-        <!-- ===================== HALAMAN TRANSAKSI ===================== -->
-        <section id="pageTransaksi" class="page-section" style="display:none;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                <h2 style="font-size:22px;font-weight:600;">📝 Semua Transaksi</h2>
-                <button class="btn-add" id="btnTambahDariPage"><i class="fas fa-plus"></i> Tambah</button>
-            </div>
-            <div class="history-section" style="padding:0;">
-                <div id="allTransaksiList" style="padding:20px;">
-                    <!-- diisi JS -->
-                </div>
-            </div>
-        </section>
-
-        <!-- ===================== HALAMAN TARGET ===================== -->
-        <section id="pageTarget" class="page-section" style="display:none;">
-            <h2 style="font-size:22px;font-weight:600;margin-bottom:20px;">🎯 Kelola Target</h2>
-            <div class="history-section" style="padding:24px;">
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px;">
-                    <div>
-                        <label style="color:#6a7f99;font-size:13px;">Nama Target</label>
-                        <input type="text" id="targetNamaInput" class="form-input" value="Tabungan Darurat" />
-                    </div>
-                    <div>
-                        <label style="color:#6a7f99;font-size:13px;">Nominal Target (Rp)</label>
-                        <input type="number" id="targetNominalInput" class="form-input" value="10000000" />
-                    </div>
-                </div>
-                <button class="btn-add" id="btnSimpanTarget" style="margin-top:16px;"><i class="fas fa-save"></i> Simpan Target</button>
-                <div style="margin-top:24px;border-top:1px solid rgba(255,255,255,0.04);padding-top:20px;">
-                    <div style="display:flex;justify-content:space-between;color:#6a7f99;font-size:14px;">
-                        <span>Progress</span>
-                        <span id="targetProgressText">0%</span>
-                    </div>
-                    <div class="progress-container" style="margin-top:6px;">
-                        <div class="progress-bar" id="targetProgress2" style="width:0%;"></div>
-                    </div>
-                    <div style="display:flex;justify-content:space-between;margin-top:12px;color:#e8edf5;">
-                        <span id="targetTerkumpul">Rp 0</span>
-                        <span id="targetSisa">sisa Rp 0</span>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ===================== HALAMAN LAPORAN ===================== -->
-        <section id="pageLaporan" class="page-section" style="display:none;">
-            <h2 style="font-size:22px;font-weight:600;margin-bottom:20px;">📊 Laporan Keuangan</h2>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
-                <div class="history-section" style="padding:20px;">
-                    <h4 style="margin-bottom:12px;">Pemasukan vs Pengeluaran</h4>
-                    <div id="laporanBulanan" style="height:200px; display:flex; align-items:flex-end; gap:8px; padding-top:20px;">
-                        <!-- diisi JS -->
-                    </div>
-                    <div style="display:flex; justify-content:space-between; margin-top:8px; color:#6a7f99; font-size:12px;" id="laporanLabelBulan">
-                        <span>Jan</span><span>Feb</span><span>Mar</span><span>Apr</span><span>Mei</span><span>Jun</span>
-                        <span>Jul</span><span>Agu</span><span>Sep</span><span>Okt</span><span>Nov</span><span>Des</span>
-                    </div>
-                </div>
-                <div class="history-section" style="padding:20px;">
-                    <h4 style="margin-bottom:12px;">Ringkasan</h4>
-                    <div id="laporanRingkasan">
-                        <p style="color:#6a7f99;">Belum ada data</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- footer -->
-        <div style="text-align:center; margin-top:32px; color:#4a5a72; font-size:12px; border-top:1px solid rgba(255,255,255,0.04); padding-top:16px;">
-            <i class="fas fa-database"></i> Data tersimpan di localStorage • siap migrasi ke SQLite
-        </div>
-    </main>
-
-    <!-- ============================================================ -->
-    <!-- MODAL TAMBAH TRANSAKSI (diperbaiki) -->
-    <!-- ============================================================ -->
-    <div class="modal-overlay" id="modalTransaksi" style="display:none;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="modalTitle">Tambah Transaksi</h3>
-                <button class="modal-close" id="modalClose">&times;</button>
-            </div>
-            <form id="formTransaksi">
-                <div class="form-group">
-                    <label>Jenis</label>
-                    <div class="radio-group">
-                        <label>
-                            <input type="radio" name="jenis" value="pemasukan" checked /> Pemasukan
-                        </label>
-                        <label>
-                            <input type="radio" name="jenis" value="pengeluaran" /> Pengeluaran
-                        </label>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Keterangan</label>
-                    <input type="text" id="fKeterangan" placeholder="Misal: Gaji, Makan siang..." required />
-                </div>
-                <div class="form-group">
-                    <label>Nominal (Rp)</label>
-                    <input type="number" id="fNominal" placeholder="0" min="1" required />
-                </div>
-                <div class="form-group">
-                    <label>Kategori</label>
-                    <select id="fKategori">
-                        <option value="Makanan">🍔 Makanan</option>
-                        <option value="Transport">🚗 Transport</option>
-                        <option value="Belanja">🛍️ Belanja</option>
-                        <option value="Tagihan">📄 Tagihan</option>
-                        <option value="Hiburan">🎬 Hiburan</option>
-                        <option value="Kesehatan">💊 Kesehatan</option>
-                        <option value="Pendidikan">📚 Pendidikan</option>
-                        <option value="Pemasukan">💰 Pemasukan</option>
-                        <option value="Lainnya">🔹 Lainnya</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Tanggal</label>
-                    <input type="date" id="fTanggal" />
-                </div>
-                <div class="modal-actions">
-                    <button type="submit" class="btn-add btn-save"><i class="fas fa-save"></i> Simpan</button>
-                    <button type="button" class="btn-cancel" id="modalCancel">Batal</button>
-                </div>
-            </form>
-        </div>
+    <div class="logo">
+        K<span>.</span>
     </div>
 
-    <!-- ============================================================ -->
-    <!-- SCRIPT -->
-    <!-- ============================================================ -->
-    <script src="js/script.js"></script>
+    <nav class="nav-icons">
+
+        <a href="#"
+           class="active"
+           data-page="dashboard"
+           title="Dashboard">
+            <i class="fas fa-th-large"></i>
+        </a>
+
+        <a href="#"
+           data-page="transaksi"
+           title="Transaksi">
+            <i class="fas fa-receipt"></i>
+        </a>
+
+        <a href="#"
+           data-page="target"
+           title="Target">
+            <i class="fas fa-bullseye"></i>
+        </a>
+
+        <a href="#"
+           data-page="laporan"
+           title="Laporan">
+            <i class="fas fa-chart-pie"></i>
+        </a>
+
+    </nav>
+
+    <div class="avatar-bottom" id="avatarUser">
+        S
+    </div>
+
+</aside>
+
+
+<!-- ============================================================
+     MAIN CONTENT
+============================================================ -->
+<main class="main-content" id="mainContent">
+
+    <!-- ========================================================
+         HEADER
+    ========================================================= -->
+    <header class="header">
+
+        <div class="header-left">
+
+            <h2>
+                Welcome Back,
+                <span id="userName">Saya</span>
+            </h2>
+
+            <p id="dateRange">
+                <i class="far fa-calendar-alt"></i>
+                <span id="rangeText">Bulan ini</span>
+            </p>
+
+        </div>
+
+        <div class="header-right">
+
+            <button
+                class="btn-filter"
+                id="btnFilterPeriod"
+                type="button"
+            >
+                <i class="fas fa-calendar"></i>
+                Bulan ini
+            </button>
+
+            <button
+                class="btn-add"
+                id="btnTambahTransaksi"
+                type="button"
+            >
+                <i class="fas fa-plus"></i>
+                Tambah
+            </button>
+
+        </div>
+
+    </header>
+
+
+    <!-- ========================================================
+         DASHBOARD
+    ======================================================== -->
+    <section
+        id="pageDashboard"
+        class="page-section active"
+    >
+
+        <!-- ====================================================
+             CARDS
+        ==================================================== -->
+        <div class="cards-row">
+
+            <!-- SALDO -->
+            <div class="card-primary">
+
+                <div class="card-label">
+
+                    <span>
+                        Total Saldo
+                    </span>
+
+                    <span
+                        class="badge"
+                        id="saldoBadge"
+                    >
+                        <i class="fas fa-minus"></i>
+                        Seimbang
+                    </span>
+
+                </div>
+
+                <div
+                    class="card-amount"
+                    id="totalSaldo"
+                >
+                    Rp 0
+                </div>
+
+                <div class="card-footer">
+
+                    <span class="visa">
+                        💳
+                        <span id="cardName">
+                            Keuangan Utama
+                        </span>
+                    </span>
+
+                    <span id="cardExpiry">
+                        Indonesia
+                    </span>
+
+                    <span
+                        class="trend-up"
+                        id="trendSaldo"
+                    >
+                        <i class="fas fa-minus"></i>
+                        Seimbang
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <!-- PEMASUKAN -->
+            <div class="card-secondary">
+
+                <div class="label">
+                    <i class="fas fa-arrow-up income-icon"></i>
+                    Pemasukan
+                </div>
+
+                <div
+                    class="value"
+                    id="totalPemasukan"
+                >
+                    Rp 0
+                </div>
+
+                <div
+                    class="sub"
+                    id="jmlPemasukan"
+                >
+                    0 transaksi
+                </div>
+
+                <div
+                    class="mini-chart"
+                    id="chartPemasukan"
+                >
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+
+            </div>
+
+
+            <!-- PENGELUARAN -->
+            <div class="card-secondary">
+
+                <div class="label">
+                    <i class="fas fa-arrow-down expense-icon"></i>
+                    Pengeluaran
+                </div>
+
+                <div
+                    class="value"
+                    id="totalPengeluaran"
+                >
+                    Rp 0
+                </div>
+
+                <div
+                    class="sub"
+                    id="jmlPengeluaran"
+                >
+                    0 transaksi
+                </div>
+
+                <div
+                    class="mini-chart"
+                    id="chartPengeluaran"
+                >
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ====================================================
+             MIDDLE
+        ==================================================== -->
+        <div class="middle-row">
+
+            <!-- KATEGORI -->
+            <div class="stat-card">
+
+                <div class="head">
+
+                    <span>
+                        Pengeluaran per Kategori
+                    </span>
+
+                    <span
+                        class="change"
+                        id="kategoriTeratas"
+                    >
+                        —
+                    </span>
+
+                </div>
+
+                <div
+                    id="kategoriChart"
+                    class="kategori-chart"
+                >
+                </div>
+
+            </div>
+
+
+            <!-- TARGET -->
+            <div class="stat-card">
+
+                <div class="head">
+
+                    <span>
+                        🎯 Target Tabungan
+                    </span>
+
+                    <span
+                        class="change"
+                        id="targetStatus"
+                    >
+                        0%
+                    </span>
+
+                </div>
+
+                <div
+                    class="big-number"
+                    id="targetNominal"
+                >
+                    Rp 0
+                </div>
+
+                <div
+                    class="desc"
+                    id="targetDesc"
+                >
+                    dari target Rp 0
+                </div>
+
+                <div class="progress-container">
+
+                    <div
+                        class="progress-bar"
+                        id="targetProgress"
+                        style="width:0%"
+                    ></div>
+
+                </div>
+
+                <div class="target-footer">
+
+                    <span id="targetMiniAmount">
+                        Rp 0
+                    </span>
+
+                    <button
+                        class="btn-edit-target"
+                        id="btnEditTarget"
+                        type="button"
+                    >
+                        <i class="fas fa-pen"></i>
+                        Atur Target
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ====================================================
+             HISTORY
+        ==================================================== -->
+        <div class="history-section">
+
+            <div class="history-header">
+
+                <h3>
+                    📋 Riwayat Transaksi
+                </h3>
+
+                <div class="history-controls">
+
+                    <select
+                        id="filterKategori"
+                        class="filter-select"
+                    >
+                        <option value="semua">
+                            Semua Kategori
+                        </option>
+
+                        <option value="Makanan">
+                            🍔 Makanan
+                        </option>
+
+                        <option value="Transport">
+                            🚗 Transport
+                        </option>
+
+                        <option value="Belanja">
+                            🛍️ Belanja
+                        </option>
+
+                        <option value="Tagihan">
+                            📄 Tagihan
+                        </option>
+
+                        <option value="Hiburan">
+                            🎬 Hiburan
+                        </option>
+
+                        <option value="Kesehatan">
+                            💊 Kesehatan
+                        </option>
+
+                        <option value="Pendidikan">
+                            📚 Pendidikan
+                        </option>
+
+                        <option value="Pemasukan">
+                            💰 Pemasukan
+                        </option>
+
+                        <option value="Lainnya">
+                            🔹 Lainnya
+                        </option>
+
+                    </select>
+
+                    <span
+                        id="jmlRiwayat"
+                        class="history-count"
+                    >
+                        0 transaksi
+                    </span>
+
+                </div>
+
+            </div>
+
+            <div
+                class="history-table"
+                id="historyTable"
+            >
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ========================================================
+         TRANSAKSI
+    ======================================================== -->
+    <section
+        id="pageTransaksi"
+        class="page-section"
+        style="display:none;"
+    >
+
+        <div class="page-title-row">
+
+            <div>
+                <h2>
+                    📝 Semua Transaksi
+                </h2>
+
+                <p>
+                    Kelola seluruh pemasukan dan pengeluaran.
+                </p>
+            </div>
+
+            <button
+                class="btn-add"
+                id="btnTambahDariPage"
+                type="button"
+            >
+                <i class="fas fa-plus"></i>
+                Tambah
+            </button>
+
+        </div>
+
+        <div class="history-section">
+
+            <div
+                id="allTransaksiList"
+                class="all-transaksi-list"
+            >
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ========================================================
+         TARGET
+    ======================================================== -->
+    <section
+        id="pageTarget"
+        class="page-section"
+        style="display:none;"
+    >
+
+        <div class="page-title-row">
+
+            <div>
+                <h2>
+                    🎯 Kelola Target
+                </h2>
+
+                <p>
+                    Atur target keuangan yang ingin dicapai.
+                </p>
+            </div>
+
+        </div>
+
+        <div class="history-section target-page">
+
+            <div class="target-form-grid">
+
+                <div class="form-group">
+
+                    <label for="targetNamaInput">
+                        Nama Target
+                    </label>
+
+                    <input
+                        type="text"
+                        id="targetNamaInput"
+                        class="form-input"
+                        placeholder="Contoh: Tabungan Darurat"
+                    >
+
+                </div>
+
+                <div class="form-group">
+
+                    <label for="targetNominalInput">
+                        Nominal Target (Rp)
+                    </label>
+
+                    <input
+                        type="number"
+                        id="targetNominalInput"
+                        class="form-input"
+                        placeholder="10000000"
+                        min="1"
+                    >
+
+                </div>
+
+            </div>
+
+            <button
+                class="btn-add"
+                id="btnSimpanTarget"
+                type="button"
+            >
+                <i class="fas fa-save"></i>
+                Simpan Target
+            </button>
+
+
+            <div class="target-detail">
+
+                <div class="target-detail-header">
+
+                    <span>
+                        Progress
+                    </span>
+
+                    <strong id="targetProgressText">
+                        0%
+                    </strong>
+
+                </div>
+
+                <div class="progress-container">
+
+                    <div
+                        class="progress-bar"
+                        id="targetProgress2"
+                        style="width:0%"
+                    ></div>
+
+                </div>
+
+                <div class="target-money">
+
+                    <span id="targetTerkumpul">
+                        Rp 0
+                    </span>
+
+                    <span id="targetSisa">
+                        sisa Rp 0
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ========================================================
+         LAPORAN
+    ======================================================== -->
+    <section
+        id="pageLaporan"
+        class="page-section"
+        style="display:none;"
+    >
+
+        <div class="page-title-row">
+
+            <div>
+                <h2>
+                    📊 Laporan Keuangan
+                </h2>
+
+                <p>
+                    Ringkasan keuangan selama tahun berjalan.
+                </p>
+            </div>
+
+        </div>
+
+        <div class="laporan-grid">
+
+            <div class="history-section laporan-card">
+
+                <h4>
+                    Pemasukan vs Pengeluaran
+                </h4>
+
+                <div
+                    id="laporanBulanan"
+                    class="laporan-chart"
+                >
+                </div>
+
+                <div
+                    id="laporanLabelBulan"
+                    class="laporan-labels"
+                >
+                </div>
+
+                <div class="chart-legend">
+
+                    <span>
+                        <i class="legend-income"></i>
+                        Pemasukan
+                    </span>
+
+                    <span>
+                        <i class="legend-expense"></i>
+                        Pengeluaran
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div class="history-section laporan-card">
+
+                <h4>
+                    Ringkasan
+                </h4>
+
+                <div
+                    id="laporanRingkasan"
+                    class="laporan-summary"
+                >
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ========================================================
+         FOOTER
+    ======================================================== -->
+    <footer class="footer">
+
+        <i class="fas fa-database"></i>
+
+        Data tersimpan di localStorage
+
+        <span>•</span>
+
+        siap migrasi ke SQLite
+
+    </footer>
+
+</main>
+
+
+<!-- ============================================================
+     MODAL TRANSAKSI
+============================================================ -->
+<div
+    class="modal-overlay"
+    id="modalTransaksi"
+    style="display:none;"
+>
+
+    <div
+        class="modal-content"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modalTitle"
+    >
+
+        <div class="modal-header">
+
+            <div>
+
+                <h3 id="modalTitle">
+                    Tambah Transaksi
+                </h3>
+
+                <p class="modal-subtitle">
+                    Masukkan data keuangan Anda.
+                </p>
+
+            </div>
+
+            <button
+                class="modal-close"
+                id="modalClose"
+                type="button"
+                aria-label="Tutup"
+            >
+                &times;
+            </button>
+
+        </div>
+
+
+        <form id="formTransaksi">
+
+            <!-- JENIS -->
+            <div class="form-group">
+
+                <label>
+                    Jenis Transaksi
+                </label>
+
+                <div class="radio-group">
+
+                    <label class="radio-card">
+
+                        <input
+                            type="radio"
+                            name="jenis"
+                            value="pemasukan"
+                            checked
+                        >
+
+                        <span>
+                            <i class="fas fa-arrow-up"></i>
+                            Pemasukan
+                        </span>
+
+                    </label>
+
+                    <label class="radio-card">
+
+                        <input
+                            type="radio"
+                            name="jenis"
+                            value="pengeluaran"
+                        >
+
+                        <span>
+                            <i class="fas fa-arrow-down"></i>
+                            Pengeluaran
+                        </span>
+
+                    </label>
+
+                </div>
+
+            </div>
+
+
+            <!-- KETERANGAN -->
+            <div class="form-group">
+
+                <label for="fKeterangan">
+                    Keterangan
+                </label>
+
+                <input
+                    type="text"
+                    id="fKeterangan"
+                    placeholder="Contoh: Gaji, makan siang..."
+                    maxlength="100"
+                    required
+                >
+
+            </div>
+
+
+            <!-- NOMINAL -->
+            <div class="form-group">
+
+                <label for="fNominal">
+                    Nominal (Rp)
+                </label>
+
+                <input
+                    type="number"
+                    id="fNominal"
+                    placeholder="0"
+                    min="1"
+                    step="1"
+                    inputmode="numeric"
+                    required
+                >
+
+            </div>
+
+
+            <!-- KATEGORI -->
+            <div class="form-group">
+
+                <label for="fKategori">
+                    Kategori
+                </label>
+
+                <select id="fKategori">
+
+                    <option value="Makanan">
+                        🍔 Makanan
+                    </option>
+
+                    <option value="Transport">
+                        🚗 Transport
+                    </option>
+
+                    <option value="Belanja">
+                        🛍️ Belanja
+                    </option>
+
+                    <option value="Tagihan">
+                        📄 Tagihan
+                    </option>
+
+                    <option value="Hiburan">
+                        🎬 Hiburan
+                    </option>
+
+                    <option value="Kesehatan">
+                        💊 Kesehatan
+                    </option>
+
+                    <option value="Pendidikan">
+                        📚 Pendidikan
+                    </option>
+
+                    <option value="Pemasukan">
+                        💰 Pemasukan
+                    </option>
+
+                    <option value="Lainnya">
+                        🔹 Lainnya
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- TANGGAL -->
+            <div class="form-group">
+
+                <label for="fTanggal">
+                    Tanggal
+                </label>
+
+                <input
+                    type="date"
+                    id="fTanggal"
+                    required
+                >
+
+            </div>
+
+
+            <!-- ACTION -->
+            <div class="modal-actions">
+
+                <button
+                    type="submit"
+                    class="btn-add btn-save"
+                >
+                    <i class="fas fa-save"></i>
+                    <span id="saveButtonText">
+                        Simpan
+                    </span>
+                </button>
+
+                <button
+                    type="button"
+                    class="btn-cancel"
+                    id="modalCancel"
+                >
+                    Batal
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<!-- SCRIPT -->
+<script src="js/script.js"></script>
+
 </body>
 </html>
