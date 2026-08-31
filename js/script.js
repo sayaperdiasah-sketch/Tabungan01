@@ -1,5 +1,5 @@
 // ================================================================
-//  STATE
+//  STATE & DOM
 // ================================================================
 let transactions = [];
 let target = { nama: 'Tabungan Darurat', nominal: 10000000 };
@@ -7,9 +7,6 @@ let editingId = null;
 let currentPage = 'dashboard';
 let filterKategori = 'semua';
 
-// ================================================================
-//  DOM REFS
-// ================================================================
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => document.querySelectorAll(s);
 
@@ -59,8 +56,6 @@ const dom = {
     btnEditTarget: $('#btnEditTarget'),
     btnFilterPeriod: $('#btnFilterPeriod'),
     rangeText: $('#rangeText'),
-    greeting: $('#greeting'),
-    userName: $('#userName'),
 };
 
 // ================================================================
@@ -75,18 +70,24 @@ function loadData() {
             target = data.target || { nama: 'Tabungan Darurat', nominal: 10000000 };
         } else {
             // Data dummy untuk demo (opsional)
-            // transactions = [...];
+            // transactions = [];
+            // target = { nama: 'Tabungan Darurat', nominal: 10000000 };
         }
     } catch (e) {
-        console.warn('Gagal load data:', e);
+        console.warn('Gagal load data', e);
+        transactions = [];
+        target = { nama: 'Tabungan Darurat', nominal: 10000000 };
     }
 }
 
 function saveData() {
     try {
-        localStorage.setItem('keuangan_data', JSON.stringify({ transactions, target }));
+        localStorage.setItem('keuangan_data', JSON.stringify({
+            transactions,
+            target
+        }));
     } catch (e) {
-        console.warn('Gagal save data:', e);
+        console.warn('Gagal save', e);
     }
 }
 
@@ -191,6 +192,7 @@ function renderHistory() {
 
     dom.historyTable.innerHTML = html;
 
+    // Event hapus
     dom.historyTable.querySelectorAll('.delete-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             const id = parseInt(this.dataset.id);
@@ -437,7 +439,7 @@ function closeModal() {
 }
 
 // ================================================================
-//  FORM SUBMIT (Tambah & Edit)
+//  FORM SUBMIT
 // ================================================================
 function handleFormSubmit(e) {
     e.preventDefault();
@@ -453,13 +455,11 @@ function handleFormSubmit(e) {
     if (!tanggal) { alert('Pilih tanggal'); return; }
 
     if (editingId) {
-        // Edit
         const idx = transactions.findIndex(t => t.id === editingId);
         if (idx !== -1) {
             transactions[idx] = { ...transactions[idx], jenis, keterangan, nominal, kategori, tanggal };
         }
     } else {
-        // Tambah
         transactions.push({
             id: Date.now() + Math.random() * 1000,
             jenis,
@@ -519,7 +519,7 @@ function bindEvents() {
         navigateTo('target');
     });
 
-    // Filter period
+    // Filter period (toggle sederhana)
     dom.btnFilterPeriod.addEventListener('click', function() {
         const currentText = this.textContent.trim();
         if (currentText.includes('Bulan')) {
@@ -533,6 +533,7 @@ function bindEvents() {
         renderAll();
     });
 
+    // Escape close modal
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') closeModal();
     });
@@ -557,16 +558,14 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
-function setDefaultDate() {
-    dom.fTanggal.value = new Date().toISOString().split('T')[0];
-}
-
 // ================================================================
-//  START
+//  INIT
 // ================================================================
-document.addEventListener('DOMContentLoaded', () => {
-    setDefaultDate();
+function init() {
     loadData();
     renderAll();
     bindEvents();
-});
+    dom.fTanggal.value = new Date().toISOString().split('T')[0];
+}
+
+document.addEventListener('DOMContentLoaded', init);
