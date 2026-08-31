@@ -1,4 +1,4 @@
-a/* ============================================================
+/* ============================================================
    RESET & VARIABLES
    ============================================================ */
 * {
@@ -433,15 +433,19 @@ body {
 .status.success { background: rgba(0, 212, 170, 0.12); color: var(--success); }
 .status.pending { background: rgba(255, 193, 7, 0.12); color: var(--warning); }
 .row .amount { font-weight: 600; }
-.row .delete-btn {
+.row .delete-btn,
+.row .edit-btn {
     background: none;
     border: none;
     color: var(--text-secondary);
     cursor: pointer;
-    font-size: 16px;
+    font-size: 15px;
+    padding: 4px 6px;
+    border-radius: 6px;
     transition: var(--transition);
 }
-.row .delete-btn:hover { color: var(--danger); }
+.row .delete-btn:hover { color: var(--danger); background: rgba(255,107,107,0.1); }
+.row .edit-btn:hover { color: var(--accent-light); background: rgba(108,92,231,0.1); }
 
 .empty-state {
     text-align: center;
@@ -537,6 +541,19 @@ body {
 .modal-content .form-group select:focus {
     outline: none;
     border-color: var(--accent);
+}
+.modal-content .radio-group {
+    display: flex;
+    gap: 16px;
+}
+.modal-content .radio-group label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    color: var(--text-primary);
+    font-weight: 400;
+    font-size: 14px;
 }
 
 .btn-cancel {
