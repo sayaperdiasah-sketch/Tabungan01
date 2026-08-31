@@ -68,10 +68,6 @@ function loadData() {
             const data = JSON.parse(raw);
             transactions = data.transactions || [];
             target = data.target || { nama: 'Tabungan Darurat', nominal: 10000000 };
-        } else {
-            // Data dummy untuk demo (opsional)
-            // transactions = [];
-            // target = { nama: 'Tabungan Darurat', nominal: 10000000 };
         }
     } catch (e) {
         console.warn('Gagal load data', e);
@@ -146,7 +142,7 @@ function renderSaldo() {
 }
 
 // ================================================================
-//  RENDER HISTORY
+//  RENDER HISTORY (dengan tombol Edit & Hapus)
 // ================================================================
 function renderHistory() {
     const filter = dom.filterKategori.value;
@@ -182,9 +178,12 @@ function renderHistory() {
                 <span>${escapeHtml(t.keterangan)}</span>
                 <span>${formatTanggal(t.tanggal)}</span>
                 <span>${escapeHtml(t.kategori)}</span>
-                <span style="display:flex;align-items:center;gap:8px;justify-content:space-between;">
+                <span style="display:flex;align-items:center;gap:6px;justify-content:space-between;">
                     <span style="color:${color};font-weight:700;">${sign} Rp${formatRupiah(t.nominal)}</span>
-                    <button class="delete-btn" data-id="${t.id}" title="Hapus"><i class="fas fa-trash"></i></button>
+                    <div style="display:flex;gap:4px;">
+                        <button class="edit-btn" data-id="${t.id}" title="Edit"><i class="fas fa-pen"></i></button>
+                        <button class="delete-btn" data-id="${t.id}" title="Hapus"><i class="fas fa-trash"></i></button>
+                    </div>
                 </span>
             </div>
         `;
@@ -192,7 +191,16 @@ function renderHistory() {
 
     dom.historyTable.innerHTML = html;
 
-    // Event hapus
+    // Event Edit
+    dom.historyTable.querySelectorAll('.edit-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const id = parseInt(this.dataset.id);
+            const data = transactions.find(t => t.id === id);
+            if (data) openModal(data);
+        });
+    });
+
+    // Event Hapus
     dom.historyTable.querySelectorAll('.delete-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             const id = parseInt(this.dataset.id);
@@ -230,14 +238,25 @@ function renderAllTransactions() {
                 <span>${escapeHtml(t.keterangan)}</span>
                 <span>${formatTanggal(t.tanggal)}</span>
                 <span>${escapeHtml(t.kategori)}</span>
-                <span style="display:flex;align-items:center;gap:8px;justify-content:space-between;">
+                <span style="display:flex;align-items:center;gap:6px;justify-content:space-between;">
                     <span style="color:${color};font-weight:700;">${sign} Rp${formatRupiah(t.nominal)}</span>
-                    <button class="delete-btn" data-id="${t.id}" title="Hapus"><i class="fas fa-trash"></i></button>
+                    <div style="display:flex;gap:4px;">
+                        <button class="edit-btn" data-id="${t.id}" title="Edit"><i class="fas fa-pen"></i></button>
+                        <button class="delete-btn" data-id="${t.id}" title="Hapus"><i class="fas fa-trash"></i></button>
+                    </div>
                 </span>
             </div>
         `;
     });
     list.innerHTML = html;
+
+    list.querySelectorAll('.edit-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const id = parseInt(this.dataset.id);
+            const data = transactions.find(t => t.id === id);
+            if (data) openModal(data);
+        });
+    });
 
     list.querySelectorAll('.delete-btn').forEach(btn => {
         btn.addEventListener('click', function() {
@@ -519,7 +538,7 @@ function bindEvents() {
         navigateTo('target');
     });
 
-    // Filter period (toggle sederhana)
+    // Filter period
     dom.btnFilterPeriod.addEventListener('click', function() {
         const currentText = this.textContent.trim();
         if (currentText.includes('Bulan')) {
