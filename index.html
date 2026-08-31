@@ -4,18 +4,13 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Keuangan Pribadi • Dashboard</title>
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-    <!-- Google Font (Inter) -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet" />
-    <!-- CSS -->
     <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
 
-    <!-- ============================================================ -->
     <!-- SIDEBAR -->
-    <!-- ============================================================ -->
     <aside class="sidebar" id="sidebar">
         <div class="logo">K<span>.</span></div>
         <nav class="nav-icons">
@@ -27,12 +22,10 @@
         <div class="avatar-bottom" id="avatarUser">S</div>
     </aside>
 
-    <!-- ============================================================ -->
     <!-- MAIN CONTENT -->
-    <!-- ============================================================ -->
     <main class="main-content" id="mainContent">
 
-        <!-- ===================== HEADER ===================== -->
+        <!-- HEADER -->
         <header class="header">
             <div class="header-left">
                 <h2 id="greeting">Welcome Back, <span id="userName">Saya</span></h2>
@@ -48,12 +41,10 @@
             </div>
         </header>
 
-        <!-- ===================== DASHBOARD ===================== -->
+        <!-- DASHBOARD -->
         <section id="pageDashboard" class="page-section active">
 
-            <!-- CARDS ROW -->
             <div class="cards-row">
-                <!-- Saldo Utama -->
                 <div class="card-primary">
                     <div class="card-label">
                         <span>Total Saldo</span>
@@ -67,7 +58,6 @@
                     </div>
                 </div>
 
-                <!-- Pemasukan Bulan Ini -->
                 <div class="card-secondary">
                     <div class="label"><i class="fas fa-arrow-up" style="color:#00d4aa;"></i> Pemasukan</div>
                     <div class="value" id="totalPemasukan">Rp 0</div>
@@ -78,7 +68,6 @@
                     </div>
                 </div>
 
-                <!-- Pengeluaran Bulan Ini -->
                 <div class="card-secondary">
                     <div class="label"><i class="fas fa-arrow-down" style="color:#ff6b6b;"></i> Pengeluaran</div>
                     <div class="value" id="totalPengeluaran">Rp 0</div>
@@ -90,20 +79,15 @@
                 </div>
             </div>
 
-            <!-- MIDDLE ROW : Grafik + Target -->
             <div class="middle-row">
-                <!-- Grafik Kategori -->
                 <div class="stat-card">
                     <div class="head">
                         <span>Pengeluaran per Kategori</span>
                         <span class="change" id="kategoriTeratas">Makanan</span>
                     </div>
-                    <div id="kategoriChart" class="kategori-chart">
-                        <!-- diisi JS -->
-                    </div>
+                    <div id="kategoriChart" class="kategori-chart"></div>
                 </div>
 
-                <!-- Target Tabungan -->
                 <div class="stat-card">
                     <div class="head">
                         <span>🎯 Target Tabungan</span>
@@ -120,7 +104,6 @@
                 </div>
             </div>
 
-            <!-- RIWAYAT TRANSAKSI -->
             <div class="history-section">
                 <div class="history-header">
                     <h3>📋 Riwayat Transaksi</h3>
@@ -140,27 +123,23 @@
                         <span id="jmlRiwayat" style="color:#6a7f99;font-size:13px;">0 transaksi</span>
                     </div>
                 </div>
-                <div class="history-table" id="historyTable">
-                    <!-- diisi JS -->
-                </div>
+                <div class="history-table" id="historyTable"></div>
             </div>
 
         </section>
 
-        <!-- ===================== HALAMAN TRANSAKSI ===================== -->
+        <!-- HALAMAN TRANSAKSI -->
         <section id="pageTransaksi" class="page-section" style="display:none;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
                 <h2 style="font-size:22px;font-weight:600;">📝 Semua Transaksi</h2>
                 <button class="btn-add" id="btnTambahDariPage"><i class="fas fa-plus"></i> Tambah</button>
             </div>
             <div class="history-section" style="padding:0;">
-                <div id="allTransaksiList" style="padding:20px;">
-                    <!-- diisi JS -->
-                </div>
+                <div id="allTransaksiList" style="padding:20px;"></div>
             </div>
         </section>
 
-        <!-- ===================== HALAMAN TARGET ===================== -->
+        <!-- HALAMAN TARGET -->
         <section id="pageTarget" class="page-section" style="display:none;">
             <h2 style="font-size:22px;font-weight:600;margin-bottom:20px;">🎯 Kelola Target</h2>
             <div class="history-section" style="padding:24px;">
@@ -191,15 +170,13 @@
             </div>
         </section>
 
-        <!-- ===================== HALAMAN LAPORAN ===================== -->
+        <!-- HALAMAN LAPORAN -->
         <section id="pageLaporan" class="page-section" style="display:none;">
             <h2 style="font-size:22px;font-weight:600;margin-bottom:20px;">📊 Laporan Keuangan</h2>
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
                 <div class="history-section" style="padding:20px;">
                     <h4 style="margin-bottom:12px;">Pemasukan vs Pengeluaran</h4>
-                    <div id="laporanBulanan" style="height:200px; display:flex; align-items:flex-end; gap:8px; padding-top:20px;">
-                        <!-- diisi JS -->
-                    </div>
+                    <div id="laporanBulanan" style="height:200px; display:flex; align-items:flex-end; gap:8px; padding-top:20px;"></div>
                     <div style="display:flex; justify-content:space-between; margin-top:8px; color:#6a7f99; font-size:12px;" id="laporanLabelBulan">
                         <span>Jan</span><span>Feb</span><span>Mar</span><span>Apr</span><span>Mei</span><span>Jun</span>
                         <span>Jul</span><span>Agu</span><span>Sep</span><span>Okt</span><span>Nov</span><span>Des</span>
@@ -214,15 +191,12 @@
             </div>
         </section>
 
-        <!-- footer -->
         <div style="text-align:center; margin-top:32px; color:#4a5a72; font-size:12px; border-top:1px solid rgba(255,255,255,0.04); padding-top:16px;">
-            <i class="fas fa-database"></i> Data tersimpan di localStorage • siap migrasi ke SQLite
+            <i class="fas fa-database"></i> Data tersimpan di localStorage
         </div>
     </main>
 
-    <!-- ============================================================ -->
-    <!-- MODAL TAMBAH TRANSAKSI -->
-    <!-- ============================================================ -->
+    <!-- MODAL TAMBAH/EDIT TRANSAKSI -->
     <div class="modal-overlay" id="modalTransaksi" style="display:none;">
         <div class="modal-content">
             <div class="modal-header">
@@ -232,11 +206,11 @@
             <form id="formTransaksi">
                 <div class="form-group">
                     <label>Jenis</label>
-                    <div style="display:flex; gap:12px;">
-                        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                    <div class="radio-group">
+                        <label>
                             <input type="radio" name="jenis" value="pemasukan" checked /> Pemasukan
                         </label>
-                        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                        <label>
                             <input type="radio" name="jenis" value="pengeluaran" /> Pengeluaran
                         </label>
                     </div>
@@ -267,7 +241,7 @@
                     <label>Tanggal</label>
                     <input type="date" id="fTanggal" />
                 </div>
-                <div style="display:flex; gap:12px; margin-top:8px;">
+                <div style="display:flex; gap:12px; margin-top:16px;">
                     <button type="submit" class="btn-add" style="flex:1;justify-content:center;"><i class="fas fa-save"></i> Simpan</button>
                     <button type="button" class="btn-cancel" id="modalCancel">Batal</button>
                 </div>
@@ -275,9 +249,6 @@
         </div>
     </div>
 
-    <!-- ============================================================ -->
-    <!-- SCRIPT -->
-    <!-- ============================================================ -->
     <script src="js/script.js"></script>
 </body>
 </html>
