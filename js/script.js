@@ -8,7 +8,7 @@ let currentPage = 'dashboard';
 let filterKategori = 'semua';
 
 // ================================================================
-//  DOM REFS (sama seperti sebelumnya)
+//  DOM REFS
 // ================================================================
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => document.querySelectorAll(s);
@@ -64,83 +64,36 @@ const dom = {
 };
 
 // ================================================================
-//  API HELPER (backend)
+//  LOCAL STORAGE
 // ================================================================
-const API = {
-    async getTransactions() {
-        const res = await fetch('/api/transactions');
-        if (!res.ok) throw new Error('Gagal fetch transaksi');
-        return res.json();
-    },
-    async addTransaction(data) {
-        const res = await fetch('/api/transactions', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        });
-        if (!res.ok) throw new Error('Gagal tambah transaksi');
-        return res.json();
-    },
-    async updateTransaction(id, data) {
-        const res = await fetch(`/api/transactions/${id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        });
-        if (!res.ok) throw new Error('Gagal update transaksi');
-        return res.json();
-    },
-    async deleteTransaction(id) {
-        const res = await fetch(`/api/transactions/${id}`, { method: 'DELETE' });
-        if (!res.ok) throw new Error('Gagal hapus transaksi');
-        return res.json();
-    },
-    async getTarget() {
-        const res = await fetch('/api/target');
-        if (!res.ok) throw new Error('Gagal fetch target');
-        return res.json();
-    },
-    async saveTarget(data) {
-        const res = await fetch('/api/target', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        });
-        if (!res.ok) throw new Error('Gagal simpan target');
-        return res.json();
-    }
-};
-
-// ================================================================
-//  LOAD & SAVE (pakai API)
-// ================================================================
-async function loadData() {
+function loadData() {
     try {
-        const [txns, targetData] = await Promise.all([
-            API.getTransactions(),
-            API.getTarget()
-        ]);
-        transactions = txns || [];
-        target = targetData || { nama: 'Tabungan Darurat', nominal: 10000000 };
+        const raw = localStorage.getItem('keuangan_data');
+        if (raw) {
+            const data = JSON.parse(raw);
+            transactions = data.transactions || [];
+            target = data.target || { nama: 'Tabungan Darurat', nominal: 10000000 };
+        } else {
+            // Data dummy untuk demo (opsional)
+            // transactions = [...];
+        }
     } catch (e) {
-        console.error('Gagal load data dari server:', e);
-        // fallback kosong
-        transactions = [];
-        target = { nama: 'Tabungan Darurat', nominal: 10000000 };
+        console.warn('Gagal load data:', e);
     }
 }
 
-async function saveData() {
-    // Data sudah tersimpan realtime via API saat tambah/update/hapus
-    // Fungsi ini tidak dipakai lagi untuk full sync, tapi kita panggil render ulang.
-    renderAll();
+function saveData() {
+    try {
+        localStorage.setItem('keuangan_data', JSON.stringify({ transactions, target }));
+    } catch (e) {
+        console.warn('Gagal save data:', e);
+    }
 }
 
 // ================================================================
-//  RENDER ALL (sama seperti sebelumnya, tapi panggil loadData dulu)
+//  RENDER ALL
 // ================================================================
-async function renderAll() {
-    await loadData(); // refresh dari DB
+function renderAll() {
     renderSaldo();
     renderHistory();
     renderTarget();
@@ -151,7 +104,7 @@ async function renderAll() {
 }
 
 // ================================================================
-//  RENDER SALDO (sama persis)
+//  RENDER SALDO
 // ================================================================
 function renderSaldo() {
     const now = new Date();
@@ -192,7 +145,7 @@ function renderSaldo() {
 }
 
 // ================================================================
-//  RENDER HISTORY (dengan API delete)
+//  RENDER HISTORY
 // ================================================================
 function renderHistory() {
     const filter = dom.filterKategori.value;
@@ -239,15 +192,12 @@ function renderHistory() {
     dom.historyTable.innerHTML = html;
 
     dom.historyTable.querySelectorAll('.delete-btn').forEach(btn => {
-        btn.addEventListener('click', async function() {
+        btn.addEventListener('click', function() {
             const id = parseInt(this.dataset.id);
             if (confirm('Hapus transaksi ini?')) {
-                try {
-                    await API.deleteTransaction(id);
-                    await renderAll();
-                } catch (e) {
-                    alert('Gagal hapus: ' + e.message);
-                }
+                transactions = transactions.filter(t => t.id !== id);
+                saveData();
+                renderAll();
             }
         });
     });
@@ -288,15 +238,12 @@ function renderAllTransactions() {
     list.innerHTML = html;
 
     list.querySelectorAll('.delete-btn').forEach(btn => {
-        btn.addEventListener('click', async function() {
+        btn.addEventListener('click', function() {
             const id = parseInt(this.dataset.id);
             if (confirm('Hapus transaksi ini?')) {
-                try {
-                    await API.deleteTransaction(id);
-                    await renderAll();
-                } catch (e) {
-                    alert('Gagal hapus: ' + e.message);
-                }
+                transactions = transactions.filter(t => t.id !== id);
+                saveData();
+                renderAll();
             }
         });
     });
@@ -490,9 +437,9 @@ function closeModal() {
 }
 
 // ================================================================
-//  FORM SUBMIT (Tambah & Edit via API)
+//  FORM SUBMIT (Tambah & Edit)
 // ================================================================
-async function handleFormSubmit(e) {
+function handleFormSubmit(e) {
     e.preventDefault();
 
     const jenis = document.querySelector('input[name="jenis"]:checked').value;
@@ -505,19 +452,27 @@ async function handleFormSubmit(e) {
     if (!nominal || nominal <= 0) { alert('Masukkan nominal valid'); return; }
     if (!tanggal) { alert('Pilih tanggal'); return; }
 
-    const data = { jenis, keterangan, nominal, kategori, tanggal };
-
-    try {
-        if (editingId) {
-            await API.updateTransaction(editingId, data);
-        } else {
-            await API.addTransaction(data);
+    if (editingId) {
+        // Edit
+        const idx = transactions.findIndex(t => t.id === editingId);
+        if (idx !== -1) {
+            transactions[idx] = { ...transactions[idx], jenis, keterangan, nominal, kategori, tanggal };
         }
-        closeModal();
-        await renderAll();
-    } catch (err) {
-        alert('Gagal menyimpan: ' + err.message);
+    } else {
+        // Tambah
+        transactions.push({
+            id: Date.now() + Math.random() * 1000,
+            jenis,
+            keterangan,
+            nominal,
+            kategori,
+            tanggal
+        });
     }
+
+    saveData();
+    closeModal();
+    renderAll();
 }
 
 // ================================================================
@@ -549,17 +504,15 @@ function bindEvents() {
     dom.filterKategori.addEventListener('change', renderHistory);
 
     // Target
-    dom.btnSimpanTarget.addEventListener('click', async function() {
+    dom.btnSimpanTarget.addEventListener('click', function() {
         const nama = dom.targetNamaInput.value.trim() || 'Tabungan Darurat';
         const nominal = parseFloat(dom.targetNominalInput.value);
         if (!nominal || nominal <= 0) { alert('Masukkan nominal target yang valid'); return; }
-        try {
-            await API.saveTarget({ nama, nominal });
-            alert('✅ Target berhasil disimpan!');
-            await renderAll();
-        } catch (e) {
-            alert('Gagal simpan target: ' + e.message);
-        }
+        target.nama = nama;
+        target.nominal = nominal;
+        saveData();
+        renderTarget();
+        alert('✅ Target berhasil disimpan!');
     });
 
     dom.btnEditTarget.addEventListener('click', function() {
@@ -611,8 +564,9 @@ function setDefaultDate() {
 // ================================================================
 //  START
 // ================================================================
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', () => {
     setDefaultDate();
-    await renderAll();
+    loadData();
+    renderAll();
     bindEvents();
 });
