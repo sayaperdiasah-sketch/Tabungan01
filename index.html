@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>💰 Manajemen Keuangan Pribadi</title>
+  <!-- Font Awesome & Google Font (opsional) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+    }
+
+    body {
+      background: linear-gradient(145deg, #f5f7fc 0%, #e9edf5 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 700px;
+      width: 100%;
+      background: rgba(255,255,255,0.7);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-radius: 40px;
+      padding: 30px 28px;
+      box-shadow: 0 20px 40px rgba(0,20,40,0.15), 0 6px 12px rgba(0,0,0,0.05);
+      border: 1px solid rgba(255,255,255,0.5);
+      transition: all 0.2s ease;
+    }
+
+    h1 {
+      font-size: 2.1rem;
+      font-weight: 600;
+      color: #0b1e33;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      letter-spacing: -0.5px;
+      margin-bottom: 8px;
+    }
+
+    h1 i {
+      color: #2a7f6e;
+      font-size: 2rem;
+    }
+
+    .subhead {
+      color: #2c3e4e;
+      font-weight: 400;
+      font-size: 0.95rem;
+      margin-bottom: 28px;
+      border-left: 4px solid #2a7f6e;
+      padding-left: 16px;
+      background: rgba(42, 127, 110, 0.06);
+      border-radius: 0 20px 20px 0;
+      line-height: 1.5;
+    }
+
+    /* Saldo & ringkasan */
+    .saldo-card {
+      background: #1f2e3f;
+      color: white;
+      padding: 20px 24px;
+      border-radius: 28px;
+      margin-bottom: 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      box-shadow: 0 10px 18px rgba(0,0,0,0.1);
+    }
+
+    .saldo-label {
+      font-size: 0.9rem;
+      opacity: 0.7;
+      letter-spacing: 0.5px;
+    }
+
+    .saldo-nilai {
+      font-size: 2.2rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      background: rgba(255,255,255,0.06);
+      padding: 0 12px;
+      border-radius: 40px;
+    }
+
+    .saldo-nilai i {
+      font-size: 1.8rem;
+      margin-right: 8px;
+      color: #7bc9b5;
+    }
+
+    .total-ringkas {
+      display: flex;
+      gap: 18px;
+      color: #cddbe9;
+      font-size: 0.9rem;
+    }
+
+    .total-ringkas span {
+      background: rgba(255,255,255,0.05);
+      padding: 6px 16px;
+      border-radius: 40px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .total-ringkas i {
+      font-size: 0.9rem;
+    }
+
+    .pemasukan-badge { color: #6fcf97; }
+    .pengeluaran-badge { color: #f28b82; }
+
+    /* form */
+    .form-card {
+      background: white;
+      border-radius: 28px;
+      padding: 22px 22px 18px;
+      box-shadow: 0 6px 14px rgba(0,0,0,0.02);
+      margin-bottom: 28px;
+      border: 1px solid rgba(0,0,0,0.02);
+    }
+
+    .form-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: flex-end;
+    }
+
+    .form-group {
+      flex: 1 0 130px;
+      min-width: 110px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: #3a4b5e;
+      margin-bottom: 4px;
+      font-weight: 600;
+    }
+
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid #dce3ec;
+      border-radius: 40px;
+      font-size: 0.95rem;
+      background: #f9fafc;
+      transition: 0.2s;
+      outline: none;
+      color: #1a2a3a;
+    }
+
+    .form-group input:focus, .form-group select:focus {
+      border-color: #2a7f6e;
+      background: white;
+      box-shadow: 0 0 0 3px rgba(42, 127, 110, 0.15);
+    }
+
+    .btn-tambah {
+      background: #1f2e3f;
+      border: none;
+      color: white;
+      padding: 10px 24px;
+      border-radius: 40px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      transition: 0.2s;
+      border: 1px solid #2a3a4e;
+      flex: 0 0 auto;
+      height: 46px;
+      margin-top: 6px;
+    }
+
+    .btn-tambah:hover {
+      background: #2a7f6e;
+      border-color: #2a7f6e;
+      transform: scale(1.02);
+      box-shadow: 0 8px 14px rgba(42,127,110,0.25);
+    }
+
+    /* daftar transaksi */
+    .list-header {
+      display: flex;
+      justify-content: space-between;
+      color: #2c3e4e;
+      font-weight: 500;
+      font-size: 0.9rem;
+      padding: 0 6px 10px 6px;
+      border-bottom: 1px solid rgba(0,0,0,0.04);
+      letter-spacing: 0.3px;
+    }
+
+    .list-header i {
+      opacity: 0.5;
+      margin-right: 4px;
+    }
+
+    .transaksi-list {
+      list-style: none;
+      margin-top: 6px;
+      max-height: 340px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .transaksi-list::-webkit-scrollbar {
+      width: 5px;
+    }
+
+    .transaksi-list::-webkit-scrollbar-thumb {
+      background: #cbd5e0;
+      border-radius: 10px;
+    }
+
+    .transaksi-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 12px 12px 16px;
+      margin: 6px 0;
+      background: white;
+      border-radius: 40px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+      transition: 0.15s;
+      border: 1px solid transparent;
+    }
+
+    .transaksi-item:hover {
+      border-color: #e2e9f2;
+      background: #fafcff;
+    }
+
+    .transaksi-info {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .transaksi-keterangan {
+      font-weight: 600;
+      color: #142433;
+    }
+
+    .transaksi-kategori {
+      font-size: 0.7rem;
+      background: #eef3f9;
+      padding: 2px 14px;
+      border-radius: 30px;
+      display: inline-block;
+      color: #2f4b66;
+      width: fit-content;
+    }
+
+    .transaksi-nominal {
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+
+    .nominal-plus {
+      color: #1e8b6e;
+    }
+
+    .nominal-minus {
+      color: #d45a4a;
+    }
+
+    .aksi-hapus {
+      background: none;
+      border: none;
+      color: #a0b3c9;
+      font-size: 1.3rem;
+      cursor: pointer;
+      padding: 8px 10px;
+      border-radius: 40px;
+      transition: 0.15s;
+    }
+
+    .aksi-hapus:hover {
+      background: #fee9e7;
+      color: #c73e2e;
+    }
+
+    .empty-state {
+      text-align: center;
+      color: #74879b;
+      padding: 40px 10px 20px;
+      font-size: 0.95rem;
+    }
+
+    .empty-state i {
+      font-size: 2.6rem;
+      opacity: 0.3;
+      margin-bottom: 10px;
+      display: block;
+    }
+
+    /* footer */
+    .footer-note {
+      margin-top: 24px;
+      color: #5b6f84;
+      font-size: 0.75rem;
+      display: flex;
+      justify-content: flex-end;
+      letter-spacing: 0.3px;
+      border-top: 1px solid rgba(0,0,0,0.03);
+      padding-top: 18px;
+      gap: 14px;
+    }
+
+    .footer-note i {
+      margin-right: 6px;
+      opacity: 0.6;
+    }
+
+    @media (max-width: 500px) {
+      .container { padding: 20px 16px; }
+      .saldo-card { flex-direction: column; align-items: stretch; gap: 12px; }
+      .saldo-nilai { font-size: 1.8rem; }
+      .form-row { flex-direction: column; }
+      .btn-tambah { width: 100%; justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>
+    <i class="fas fa-wallet"></i> Keuangan
+  </h1>
+  <div class="subhead">
+    <i class="fas fa-pen-fancy" style="margin-right: 8px; color: #2a7f6e;"></i> 
+    Catat pemasukan & pengeluaran • tetap sehat finansial
+  </div>
+
+  <!-- Saldo & ringkasan -->
+  <div class="saldo-card">
+    <div>
+      <div class="saldo-label"><i class="fas fa-circle"></i> Saldo saat ini</div>
+      <div class="saldo-nilai" id="saldoDisplay">
+        <i class="fas fa-rupiah-sign"></i> <span id="saldoAngka">0</span>
+      </div>
+    </div>
+    <div class="total-ringkas">
+      <span><i class="fas fa-arrow-up pemasukan-badge"></i> <span id="totalPemasukan">0</span></span>
+      <span><i class="fas fa-arrow-down pengeluaran-badge"></i> <span id="totalPengeluaran">0</span></span>
+    </div>
+  </div>
+
+  <!-- Form tambah -->
+  <div class="form-card">
+    <form id="formTransaksi" autocomplete="off">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="keterangan"><i class="far fa-pen"></i> Keterangan</label>
+          <input type="text" id="keterangan" placeholder="Makan siang, gaji..." required>
+        </div>
+        <div class="form-group">
+          <label for="nominal"><i class="fas fa-coins"></i> Nominal (Rp)</label>
+          <input type="number" id="nominal" placeholder="0" min="1" required>
+        </div>
+        <div class="form-group">
+          <label for="kategori"><i class="fas fa-tag"></i> Kategori</label>
+          <select id="kategori">
+            <option value="Makanan">🍔 Makanan</option>
+            <option value="Transport">🚗 Transport</option>
+            <option value="Belanja">🛍️ Belanja</option>
+            <option value="Tagihan">📄 Tagihan</option>
+            <option value="Hiburan">🎬 Hiburan</option>
+            <option value="Kesehatan">💊 Kesehatan</option>
+            <option value="Pendidikan">📚 Pendidikan</option>
+            <option value="Lainnya">🔹 Lainnya</option>
+          </select>
+        </div>
+        <div class="form-group" style="flex: 0 1 140px;">
+          <label for="jenis"><i class="fas fa-arrow-right-arrow-left"></i> Jenis</label>
+          <select id="jenis">
+            <option value="pemasukan">➕ Pemasukan</option>
+            <option value="pengeluaran">➖ Pengeluaran</option>
+          </select>
+        </div>
+        <button type="submit" class="btn-tambah"><i class="fas fa-plus-circle"></i> Tambah</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Daftar transaksi -->
+  <div style="margin-top: 6px;">
+    <div class="list-header">
+      <span><i class="fas fa-list-ul"></i> Riwayat</span>
+      <span><i class="fas fa-sort-amount-down-alt"></i> terbaru</span>
+    </div>
+    <ul class="transaksi-list" id="transaksiList">
+      <!-- akan diisi oleh js -->
+      <li class="empty-state">
+        <i class="fas fa-receipt"></i>
+        Belum ada transaksi<br><span style="font-size:0.8rem;">tambahkan pemasukan atau pengeluaran</span>
+      </li>
+    </ul>
+  </div>
+
+  <div class="footer-note">
+    <span><i class="fas fa-database"></i> data tersimpan di lokal</span>
+    <span><i class="fas fa-rotate-left"></i> <span id="jumlahTransaksi">0</span> transaksi</span>
+  </div>
+</div>
+
+<script>
+  (function() {
+    // --- state ---
+    let transactions = [];
+
+    // DOM elements
+    const form = document.getElementById('formTransaksi');
+    const inputKeterangan = document.getElementById('keterangan');
+    const inputNominal = document.getElementById('nominal');
+    const selectKategori = document.getElementById('kategori');
+    const selectJenis = document.getElementById('jenis');
+    const listEl = document.getElementById('transaksiList');
+    const saldoAngka = document.getElementById('saldoAngka');
+    const totalPemasukanEl = document.getElementById('totalPemasukan');
+    const totalPengeluaranEl = document.getElementById('totalPengeluaran');
+    const jumlahTransaksiEl = document.getElementById('jumlahTransaksi');
+
+    // --- helper format Rupiah ---
+    function formatRupiah(angka) {
+      return angka.toLocaleString('id-ID');
+    }
+
+    // --- render ulang UI ---
+    function render() {
+      // update saldo & total
+      let totalPemasukan = 0;
+      let totalPengeluaran = 0;
+
+      transactions.forEach(t => {
+        if (t.jenis === 'pemasukan') totalPemasukan += t.nominal;
+        else totalPengeluaran += t.nominal;
+      });
+
+      const saldo = totalPemasukan - totalPengeluaran;
+      saldoAngka.textContent = formatRupiah(saldo);
+      totalPemasukanEl.textContent = formatRupiah(totalPemasukan);
+      totalPengeluaranEl.textContent = formatRupiah(totalPengeluaran);
+      jumlahTransaksiEl.textContent = transactions.length;
+
+      // render list (urutan terbaru di atas)
+      if (transactions.length === 0) {
+        listEl.innerHTML = `
+          <li class="empty-state">
+            <i class="fas fa-receipt"></i>
+            Belum ada transaksi<br><span style="font-size:0.8rem;">tambahkan pemasukan atau pengeluaran</span>
+          </li>
+        `;
+        return;
+      }
+
+      // salin & urutkan descending (terbaru di atas) berdasarkan id atau index
+      const sorted = [...transactions].reverse(); // karena id increment, index terakhir = terbaru
+
+      let html = '';
+      sorted.forEach((t, idx) => {
+        const isPemasukan = t.jenis === 'pemasukan';
+        const nominalClass = isPemasukan ? 'nominal-plus' : 'nominal-minus';
+        const sign = isPemasukan ? '+' : '−';
+        const icon = isPemasukan ? 'fa-arrow-up' : 'fa-arrow-down';
+        const colorIcon = isPemasukan ? '#1e8b6e' : '#d45a4a';
+
+        html += `
+          <li class="transaksi-item" data-id="${t.id}">
+            <div class="transaksi-info">
+              <span class="transaksi-keterangan">${escapeHtml(t.keterangan)}</span>
+              <span class="transaksi-kategori"><i class="fas ${icon}" style="color:${colorIcon}; margin-right:6px;"></i> ${escapeHtml(t.kategori)}</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:6px;">
+              <span class="transaksi-nominal ${nominalClass}">${sign} Rp${formatRupiah(t.nominal)}</span>
+              <button class="aksi-hapus" data-id="${t.id}" title="Hapus transaksi"><i class="fas fa-trash-can"></i></button>
+            </div>
+          </li>
+        `;
+      });
+
+      listEl.innerHTML = html;
+
+      // event listener hapus (delegasi)
+      document.querySelectorAll('.aksi-hapus').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          const id = parseInt(this.getAttribute('data-id'));
+          hapusTransaksi(id);
+        });
+      });
+    }
+
+    // fungsi hapus
+    function hapusTransaksi(id) {
+      transactions = transactions.filter(t => t.id !== id);
+      simpanKeLocalStorage();
+      render();
+    }
+
+    // --- tambah transaksi ---
+    function tambahTransaksi(e) {
+      e.preventDefault();
+
+      const keterangan = inputKeterangan.value.trim();
+      const nominalRaw = inputNominal.value.trim();
+      const kategori = selectKategori.value;
+      const jenis = selectJenis.value;
+
+      if (!keterangan) {
+        alert('Masukkan keterangan transaksi.');
+        inputKeterangan.focus();
+        return;
+      }
+      if (!nominalRaw || parseFloat(nominalRaw) <= 0) {
+        alert('Masukkan nominal yang valid (lebih dari 0).');
+        inputNominal.focus();
+        return;
+      }
+
+      const nominal = parseFloat(nominalRaw);
+
+      // buat object
+      const newTrans = {
+        id: Date.now() + Math.floor(Math.random() * 1000), // unique id
+        keterangan: keterangan,
+        nominal: nominal,
+        kategori: kategori,
+        jenis: jenis,
+        createdAt: new Date().toISOString()
+      };
+
+      transactions.push(newTrans);
+      simpanKeLocalStorage();
+
+      // reset form
+      inputKeterangan.value = '';
+      inputNominal.value = '';
+      selectKategori.value = 'Makanan';
+      selectJenis.value = 'pemasukan';
+      inputKeterangan.focus();
+
+      render();
+    }
+
+    // --- LocalStorage ---
+    function simpanKeLocalStorage() {
+      try {
+        localStorage.setItem('keuanganPribadi', JSON.stringify(transactions));
+      } catch (e) {
+        console.warn('Gagal menyimpan ke localStorage');
+      }
+    }
+
+    function muatDariLocalStorage() {
+      try {
+        const data = localStorage.getItem('keuanganPribadi');
+        if (data) {
+          const parsed = JSON.parse(data);
+          if (Array.isArray(parsed) && parsed.length) {
+            transactions = parsed;
+          } else {
+            transactions = [];
+          }
+        } else {
+          // data dummy contoh (opsional)
+          transactions = [];
+          // bisa tambahkan contoh transaksi jika ingin:
+          // transactions = [
+          //   { id: 1, keterangan: 'Gaji bulan ini', nominal: 4500000, kategori: 'Pendapatan', jenis: 'pemasukan' },
+          //   { id: 2, keterangan: 'Makan siang', nominal: 25000, kategori: 'Makanan', jenis: 'pengeluaran' }
+          // ];
+          // simpanKeLocalStorage();
+        }
+      } catch (e) {
+        transactions = [];
+      }
+      render();
+    }
+
+    // --- utility escape html (XSS) ---
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // --- init ---
+    form.addEventListener('submit', tambahTransaksi);
+
+    // muat data dari localStorage saat pertama
+    muatDariLocalStorage();
+
+    // tambahan: jika kosong, tampilkan empty state sudah di handle di render.
+  })();
+</script>
+
+</body>
+</html>
