@@ -101,13 +101,12 @@ function renderAll() {
 }
 
 // ================================================================
-//  RENDER SALDO (HITUNG SEMUA TRANSAKSI, TIDAK FILTER BULAN)
+//  RENDER SALDO (HITUNG SEMUA TRANSAKSI)
 // ================================================================
 function renderSaldo() {
     let totalPemasukan = 0, totalPengeluaran = 0;
     let jmlPemasukan = 0, jmlPengeluaran = 0;
 
-    // HITUNG SEMUA TRANSAKSI
     transactions.forEach(t => {
         if (t.jenis === 'pemasukan') {
             totalPemasukan += t.nominal;
@@ -257,7 +256,6 @@ function renderAllTransactions() {
     });
     list.innerHTML = html;
 
-    // Event HAPUS (halaman transaksi)
     list.querySelectorAll('.delete-btn-all').forEach(btn => {
         btn.addEventListener('click', function(e) {
             e.stopPropagation();
@@ -270,7 +268,6 @@ function renderAllTransactions() {
         });
     });
 
-    // Event EDIT (halaman transaksi)
     list.querySelectorAll('.edit-btn-all').forEach(btn => {
         btn.addEventListener('click', function(e) {
             e.stopPropagation();
