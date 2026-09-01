@@ -220,60 +220,181 @@
         </div>
     </main>
 
-    <!-- ============================================================ -->
-    <!-- MODAL TAMBAH TRANSAKSI -->
-    <!-- ============================================================ -->
-    <div class="modal-overlay" id="modalTransaksi" style="display:none;">
-        <div class="modal-content">
-            <div class="modal-header">
+   <!-- ============================================================ -->
+<!-- MODAL TAMBAH TRANSAKSI -->
+<!-- ============================================================ -->
+<div class="modal-overlay" id="modalTransaksi" style="display:none;">
+    <div class="modal-content transaction-modal">
+
+        <div class="modal-header">
+            <div>
+                <span class="modal-kicker">TRANSAKSI</span>
                 <h3 id="modalTitle">Tambah Transaksi</h3>
-                <button class="modal-close" id="modalClose">&times;</button>
+                <p class="modal-subtitle">Catat pemasukan atau pengeluaran kamu.</p>
             </div>
-            <form id="formTransaksi">
+
+            <button class="modal-close" id="modalClose" type="button">
+                <i class="fas fa-xmark"></i>
+            </button>
+        </div>
+
+        <form id="formTransaksi">
+
+            <!-- JENIS TRANSAKSI -->
+            <div class="form-group">
+                <label class="form-label">Jenis Transaksi</label>
+
+                <div class="transaction-type">
+                    <label class="type-option income">
+                        <input
+                            type="radio"
+                            name="jenis"
+                            value="pemasukan"
+                            checked
+                        />
+
+                        <span class="type-card">
+                            <span class="type-icon">
+                                <i class="fas fa-arrow-down"></i>
+                            </span>
+
+                            <span class="type-info">
+                                <strong>Pemasukan</strong>
+                                <small>Uang masuk</small>
+                            </span>
+
+                            <span class="type-check">
+                                <i class="fas fa-check"></i>
+                            </span>
+                        </span>
+                    </label>
+
+                    <label class="type-option expense">
+                        <input
+                            type="radio"
+                            name="jenis"
+                            value="pengeluaran"
+                        />
+
+                        <span class="type-card">
+                            <span class="type-icon">
+                                <i class="fas fa-arrow-up"></i>
+                            </span>
+
+                            <span class="type-info">
+                                <strong>Pengeluaran</strong>
+                                <small>Uang keluar</small>
+                            </span>
+
+                            <span class="type-check">
+                                <i class="fas fa-check"></i>
+                            </span>
+                        </span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- KETERANGAN -->
+            <div class="form-group">
+                <label class="form-label" for="fKeterangan">
+                    Keterangan
+                </label>
+
+                <div class="input-wrapper">
+                    <i class="fas fa-pen input-icon"></i>
+                    <input
+                        type="text"
+                        id="fKeterangan"
+                        placeholder="Contoh: Gaji, makan siang, bensin..."
+                        required
+                    />
+                </div>
+            </div>
+
+            <!-- NOMINAL -->
+            <div class="form-group">
+                <label class="form-label" for="fNominal">
+                    Nominal
+                </label>
+
+                <div class="input-wrapper nominal-input">
+                    <span class="currency">Rp</span>
+                    <input
+                        type="number"
+                        id="fNominal"
+                        placeholder="0"
+                        min="1"
+                        required
+                    />
+                </div>
+            </div>
+
+            <!-- KATEGORI + TANGGAL -->
+            <div class="form-row">
+
                 <div class="form-group">
-                    <label>Jenis</label>
-                    <div style="display:flex; gap:12px;">
-                        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
-                            <input type="radio" name="jenis" value="pemasukan" checked /> Pemasukan
-                        </label>
-                        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
-                            <input type="radio" name="jenis" value="pengeluaran" /> Pengeluaran
-                        </label>
+                    <label class="form-label" for="fKategori">
+                        Kategori
+                    </label>
+
+                    <div class="select-wrapper">
+                        <i class="fas fa-layer-group input-icon"></i>
+
+                        <select id="fKategori">
+                            <option value="Makanan">🍔 Makanan</option>
+                            <option value="Transport">🚗 Transport</option>
+                            <option value="Belanja">🛍️ Belanja</option>
+                            <option value="Tagihan">📄 Tagihan</option>
+                            <option value="Hiburan">🎬 Hiburan</option>
+                            <option value="Kesehatan">💊 Kesehatan</option>
+                            <option value="Pendidikan">📚 Pendidikan</option>
+                            <option value="Pemasukan">💰 Pemasukan</option>
+                            <option value="Lainnya">🔹 Lainnya</option>
+                        </select>
                     </div>
                 </div>
+
                 <div class="form-group">
-                    <label>Keterangan</label>
-                    <input type="text" id="fKeterangan" placeholder="Misal: Gaji, Makan siang..." required />
+                    <label class="form-label" for="fTanggal">
+                        Tanggal
+                    </label>
+
+                    <div class="input-wrapper">
+                        <i class="far fa-calendar input-icon"></i>
+
+                        <input
+                            type="date"
+                            id="fTanggal"
+                        />
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label>Nominal (Rp)</label>
-                    <input type="number" id="fNominal" placeholder="0" min="1" required />
-                </div>
-                <div class="form-group">
-                    <label>Kategori</label>
-                    <select id="fKategori">
-                        <option value="Makanan">🍔 Makanan</option>
-                        <option value="Transport">🚗 Transport</option>
-                        <option value="Belanja">🛍️ Belanja</option>
-                        <option value="Tagihan">📄 Tagihan</option>
-                        <option value="Hiburan">🎬 Hiburan</option>
-                        <option value="Kesehatan">💊 Kesehatan</option>
-                        <option value="Pendidikan">📚 Pendidikan</option>
-                        <option value="Pemasukan">💰 Pemasukan</option>
-                        <option value="Lainnya">🔹 Lainnya</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Tanggal</label>
-                    <input type="date" id="fTanggal" />
-                </div>
-                <div style="display:flex; gap:12px; margin-top:16px;">
-                    <button type="submit" class="btn-add" style="flex:1;justify-content:center;"><i class="fas fa-save"></i> Simpan</button>
-                    <button type="button" class="btn-cancel" id="modalCancel">Batal</button>
-                </div>
-            </form>
-        </div>
+
+            </div>
+
+            <!-- ACTION -->
+            <div class="modal-actions">
+
+                <button
+                    type="button"
+                    class="btn-cancel"
+                    id="modalCancel"
+                >
+                    Batal
+                </button>
+
+                <button
+                    type="submit"
+                    class="btn-save-transaction"
+                >
+                    <i class="fas fa-check"></i>
+                    Simpan Transaksi
+                </button>
+
+            </div>
+
+        </form>
     </div>
+</div>
 
     <!-- ============================================================ -->
     <!-- SCRIPT -->
