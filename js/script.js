@@ -1,6 +1,5 @@
 // ================================================================
-//  KEUANGAN PRIBADI — SCRIPT.JS
-//  DENGAN MIGRASI DATA DARI VERSI LAMA
+//  KEUANGAN PRIBADI — SCRIPT.JS (FULL PERBAIKAN)
 // ================================================================
 
 // STATE
@@ -18,7 +17,6 @@ const $$ = (s) => document.querySelectorAll(s);
 
 // DOM
 const dom = {
-    // TRANSAKSI
     saldo: $('#totalSaldo'),
     pemasukan: $('#totalPemasukan'),
     pengeluaran: $('#totalPengeluaran'),
@@ -31,7 +29,6 @@ const dom = {
     filterKategori: $('#filterKategori'),
     allTransaksiList: $('#allTransaksiList'),
 
-    // TARGET
     targetNominal: $('#targetNominal'),
     targetDesc: $('#targetDesc'),
     targetProgress: $('#targetProgress'),
@@ -48,11 +45,9 @@ const dom = {
     targetPageStatus: $('#targetPageStatus'),
     targetNamaDashboard: $('#targetNamaDashboard'),
 
-    // LAPORAN
     laporanBulanan: $('#laporanBulanan'),
     laporanRingkasan: $('#laporanRingkasan'),
 
-    // MODAL TRANSAKSI
     modal: $('#modalTransaksi'),
     modalTitle: $('#modalTitle'),
     form: $('#formTransaksi'),
@@ -63,20 +58,16 @@ const dom = {
     modalClose: $('#modalClose'),
     modalCancel: $('#modalCancel'),
 
-    // BUTTON TRANSAKSI
     btnTambah: $('#btnTambahTransaksiTop'),
     btnTambahPage: $('#btnTambahDariPage'),
 
-    // BUTTON TARGET
     btnSimpanTarget: $('#btnSimpanTarget'),
     btnEditTarget: $('#btnEditTarget'),
     btnTambahTabungan: $('#btnTambahTabungan'),
 
-    // FILTER
     btnFilterPeriod: $('#btnFilterPeriod'),
     rangeText: $('#rangeText'),
 
-    // MODAL TABUNGAN
     modalTabungan: $('#modalTabungan'),
     modalTabunganTitle: $('#tabunganModalTitle'),
     formTabungan: $('#formTabungan'),
@@ -86,22 +77,18 @@ const dom = {
     modalTabunganClose: $('#tabunganModalClose'),
     modalTabunganCancel: $('#tabunganModalCancel'),
 
-    // DATE
     currentDate: $('#currentDate'),
-
-    // PERIOD
     periodBtns: $$('.period-btn'),
+    pageTitle: $('#pageTitle'),
 };
 
 // ================================================================
-//  MIGRASI DATA DARI VERSI LAMA
+//  MIGRASI DATA
 // ================================================================
 function migrateData(oldData) {
-    // Jika data lama memiliki target tanpa savings, tambahkan savings
     if (oldData.target && !oldData.target.savings) {
         oldData.target.savings = [];
     }
-    // Jika data lama transactions masih ada, tetap gunakan
     if (oldData.transactions) {
         oldData.transactions = oldData.transactions.map(t => ({
             ...t,
@@ -128,13 +115,10 @@ function loadData() {
             return;
         }
         let data = JSON.parse(raw);
-        // MIGRASI DATA DARI VERSI LAMA
         data = migrateData(data);
         transactions = data.transactions || [];
         target = data.target || { nama: 'Tabungan Darurat', nominal: 10000000, savings: [] };
-        // Pastikan target memiliki savings
         if (!target.savings) target.savings = [];
-        // Simpan kembali hasil migrasi
         saveData();
     } catch (e) {
         console.warn('Gagal load data, menggunakan default', e);
@@ -152,7 +136,7 @@ function saveData() {
 }
 
 // ================================================================
-//  FUNGSI LAINNYA (format, tanggal, dll)
+//  HELPERS
 // ================================================================
 function formatRupiah(angka) {
     return Number(angka || 0).toLocaleString('id-ID');
@@ -182,7 +166,7 @@ function createId(prefix) {
 }
 
 // ================================================================
-//  RENDER SALDO (SEMUA TRANSAKSI)
+//  RENDER SALDO
 // ================================================================
 function renderSaldo() {
     let totalPemasukan = 0, totalPengeluaran = 0;
@@ -217,7 +201,6 @@ function renderSaldo() {
         dom.trendSaldo.innerHTML = `<i class="fas fa-${positif ? 'arrow-up' : 'arrow-down'}"></i> ${positif ? 'Sehat' : 'Perhatikan'}`;
     }
 
-    // Update date display
     if (dom.currentDate) {
         const now = new Date();
         dom.currentDate.textContent = formatTanggal(now.toISOString().split('T')[0]);
@@ -264,7 +247,6 @@ function renderHistory() {
     });
     dom.historyTable.innerHTML = html;
 
-    // Event edit & delete
     dom.historyTable.querySelectorAll('.edit-btn').forEach(btn => {
         btn.addEventListener('click', function(e) {
             e.stopPropagation();
@@ -298,7 +280,7 @@ function editTransaction(id) {
 }
 
 // ================================================================
-//  RENDER ALL TRANSACTIONS (halaman transaksi)
+//  RENDER ALL TRANSACTIONS
 // ================================================================
 function renderAllTransactions() {
     if (!dom.allTransaksiList) return;
@@ -349,7 +331,7 @@ function renderAllTransactions() {
 }
 
 // ================================================================
-//  TARGET FUNCTIONS
+//  TARGET
 // ================================================================
 function getTotalTabungan() {
     if (!target || !Array.isArray(target.savings)) return 0;
@@ -363,14 +345,12 @@ function renderTarget() {
     const progress = nominalTarget > 0 ? Math.min(100, (totalTabungan / nominalTarget) * 100) : 0;
     const sisa = Math.max(0, nominalTarget - totalTabungan);
 
-    // Dashboard
     if (dom.targetNominal) dom.targetNominal.textContent = 'Rp ' + formatRupiah(totalTabungan);
     if (dom.targetDesc) dom.targetDesc.textContent = 'dari target Rp ' + formatRupiah(nominalTarget);
     if (dom.targetProgress) dom.targetProgress.style.width = progress + '%';
     if (dom.targetStatus) dom.targetStatus.textContent = progress.toFixed(1) + '%';
     if (dom.targetNamaDashboard) dom.targetNamaDashboard.textContent = target.nama || 'Tabungan Darurat';
 
-    // Target Page
     if (dom.targetProgress2) dom.targetProgress2.style.width = progress + '%';
     if (dom.targetProgressText) dom.targetProgressText.textContent = progress.toFixed(1) + '%';
     if (dom.targetTerkumpul) dom.targetTerkumpul.textContent = 'Rp ' + formatRupiah(totalTabungan);
@@ -379,11 +359,9 @@ function renderTarget() {
     if (dom.targetNamaInput) dom.targetNamaInput.value = target.nama || 'Tabungan Darurat';
     if (dom.targetNominalInput) dom.targetNominalInput.value = nominalTarget;
 
-    // Status message
     const statusMsg = getTargetStatus(progress);
     if (dom.targetPageStatus) dom.targetPageStatus.textContent = statusMsg;
 
-    // Render saving history
     renderTargetSavingHistory();
 }
 
@@ -395,9 +373,6 @@ function getTargetStatus(progress) {
     return '🌱 Baru mulai';
 }
 
-// ================================================================
-//  RENDER SAVING HISTORY
-// ================================================================
 function renderTargetSavingHistory() {
     const container = dom.targetSavingHistory;
     if (!container) return;
@@ -451,9 +426,6 @@ function renderTargetSavingHistory() {
     });
 }
 
-// ================================================================
-//  CRUD SAVING
-// ================================================================
 function editSaving(id) {
     const s = target.savings.find(item => String(item.id) === String(id));
     if (!s) { alert('Setoran tidak ditemukan'); return; }
@@ -501,9 +473,6 @@ function closeModal() {
     editingId = null;
 }
 
-// ================================================================
-//  FORM SUBMIT TRANSAKSI
-// ================================================================
 function handleFormSubmit(e) {
     e.preventDefault();
     const radio = document.querySelector('input[name="jenis"]:checked');
@@ -549,7 +518,6 @@ function openSavingModal(editData = null) {
         dom.fTabunganCatatan.value = '';
         editingSavingId = null;
     }
-    // Update target name di modal
     const targetNameEl = document.getElementById('tabunganTargetName');
     if (targetNameEl) targetNameEl.textContent = target.nama || 'Tabungan Darurat';
 }
@@ -559,9 +527,6 @@ function closeSavingModal() {
     editingSavingId = null;
 }
 
-// ================================================================
-//  FORM SUBMIT TABUNGAN
-// ================================================================
 function handleSavingSubmit(e) {
     e.preventDefault();
     if (!Array.isArray(target.savings)) target.savings = [];
@@ -584,7 +549,6 @@ function handleSavingSubmit(e) {
     closeSavingModal();
     renderAll();
 
-    // Cek apakah target tercapai
     const total = getTotalTabungan();
     if (total >= (Number(target.nominal) || 0) && Number(target.nominal) > 0) {
         setTimeout(() => alert('🎉 Selamat! Target tabungan kamu sudah tercapai!'), 300);
@@ -712,14 +676,10 @@ function navigateTo(page) {
     const navItem = document.querySelector(`.nav-item[data-page="${page}"]`);
     if (navItem) navItem.classList.add('active');
 
-    // Update page title
     const titles = { dashboard: 'Dashboard', transaksi: 'Transaksi', target: 'Target', laporan: 'Laporan' };
     if (dom.pageTitle) dom.pageTitle.textContent = titles[page] || 'Dashboard';
 }
 
-// ================================================================
-//  RENDER ALL
-// ================================================================
 function renderAll() {
     renderSaldo();
     renderHistory();
@@ -735,10 +695,10 @@ function updatePage() {
 }
 
 // ================================================================
-//  BIND EVENTS
+//  BIND EVENTS (PERBAIKAN)
 // ================================================================
 function bindEvents() {
-    // Nav
+    // NAV
     document.querySelectorAll('.nav-item').forEach(link => {
         link.addEventListener('click', function(e) {
             e.preventDefault();
@@ -747,12 +707,11 @@ function bindEvents() {
         });
     });
 
-    // Mobile menu
+    // MOBILE
     const mobileBtn = document.getElementById('mobileMenuBtn');
     const sidebar = document.getElementById('sidebar');
     const sidebarClose = document.getElementById('sidebarClose');
     const overlay = document.getElementById('sidebarOverlay');
-
     if (mobileBtn) {
         mobileBtn.addEventListener('click', function() {
             sidebar.classList.toggle('open');
@@ -772,9 +731,28 @@ function bindEvents() {
         });
     }
 
-    // Modal transaksi
-    if (dom.btnTambah) dom.btnTambah.addEventListener('click', () => openModal());
-    if (dom.btnTambahPage) dom.btnTambahPage.addEventListener('click', () => openModal());
+    // ---- TOMBOL TAMBAH (PERBAIKAN) ----
+    const tambahBtns = document.querySelectorAll('#btnTambahTransaksiTop, #btnTambahDariPage, .topbar-add-btn, .btn-add[data-action="tambah"]');
+    tambahBtns.forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            openModal();
+        });
+    });
+    if (dom.btnTambah) {
+        dom.btnTambah.addEventListener('click', function(e) {
+            e.preventDefault();
+            openModal();
+        });
+    }
+    if (dom.btnTambahPage) {
+        dom.btnTambahPage.addEventListener('click', function(e) {
+            e.preventDefault();
+            openModal();
+        });
+    }
+
+    // MODAL TRANSAKSI
     if (dom.modalClose) dom.modalClose.addEventListener('click', closeModal);
     if (dom.modalCancel) dom.modalCancel.addEventListener('click', closeModal);
     if (dom.modal) {
@@ -784,12 +762,12 @@ function bindEvents() {
     }
     if (dom.form) dom.form.addEventListener('submit', handleFormSubmit);
 
-    // Filter kategori
+    // FILTER
     if (dom.filterKategori) {
         dom.filterKategori.addEventListener('change', renderHistory);
     }
 
-    // Target
+    // TARGET
     if (dom.btnSimpanTarget) {
         dom.btnSimpanTarget.addEventListener('click', function() {
             const nama = dom.targetNamaInput?.value?.trim() || 'Tabungan Darurat';
@@ -812,7 +790,7 @@ function bindEvents() {
         });
     }
 
-    // Tabungan
+    // TABUNGAN
     if (dom.btnTambahTabungan) {
         dom.btnTambahTabungan.addEventListener('click', function() {
             openSavingModal();
@@ -827,7 +805,7 @@ function bindEvents() {
     }
     if (dom.formTabungan) dom.formTabungan.addEventListener('submit', handleSavingSubmit);
 
-    // Period buttons
+    // PERIOD
     dom.periodBtns.forEach(btn => {
         btn.addEventListener('click', function() {
             dom.periodBtns.forEach(b => b.classList.remove('active'));
@@ -837,12 +815,20 @@ function bindEvents() {
         });
     });
 
-    // Escape
+    // ESCAPE
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
             if (dom.modalTabungan && dom.modalTabungan.style.display === 'flex') closeSavingModal();
             else if (dom.modal && dom.modal.style.display === 'flex') closeModal();
         }
+    });
+
+    // VIEW ALL (ke halaman transaksi)
+    document.querySelectorAll('[data-page-link="transaksi"]').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            navigateTo('transaksi');
+        });
     });
 }
 
@@ -852,11 +838,8 @@ function bindEvents() {
 function init() {
     console.log('🚀 Keuangan Dashboard starting...');
     loadData();
-
-    // Set default date
     if (dom.fTanggal) dom.fTanggal.value = getLocalDateString();
     if (dom.fTabunganTanggal) dom.fTabunganTanggal.value = getLocalDateString();
-
     renderAll();
     bindEvents();
     console.log('✅ Keuangan Dashboard ready.');
