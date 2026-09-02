@@ -9,480 +9,472 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <link rel="stylesheet" href="css/style.css" />
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
 
-    <div class="app">
+<div class="app">
 
-        <!-- SIDEBAR -->
-        <aside class="sidebar" id="sidebar">
-            <div class="sidebar-header">
-                <div class="logo">
-                    <div class="logo-icon"><i class="fas fa-wallet"></i></div>
-                    <div class="logo-text">
-                        <strong>FinTrack</strong>
-                        <span>Keuangan Pribadi</span>
-                    </div>
-                </div>
-                <button class="sidebar-close" id="sidebarClose" type="button"><i class="fas fa-times"></i></button>
-            </div>
-            <nav class="sidebar-nav">
-                <div class="nav-label">MENU UTAMA</div>
-                <button class="nav-item active" data-page="dashboard" type="button">
-                    <i class="fas fa-chart-pie"></i> <span>Dashboard</span>
-                </button>
-                <button class="nav-item" data-page="transaksi" type="button">
-                    <i class="fas fa-arrow-right-arrow-left"></i> <span>Transaksi</span>
-                </button>
-                <button class="nav-item" data-page="target" type="button">
-                    <i class="fas fa-bullseye"></i> <span>Target</span>
-                </button>
-                <button class="nav-item" data-page="laporan" type="button">
-                    <i class="fas fa-file-lines"></i> <span>Laporan</span>
-                </button>
-            </nav>
-            <div class="sidebar-footer">
-                <div class="sidebar-tip">
-                    <div class="tip-icon"><i class="fas fa-lightbulb"></i></div>
-                    <div>
-                        <strong>Tips</strong>
-                        <p>Catat setiap transaksi agar kondisi keuanganmu tetap terkontrol.</p>
-                    </div>
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <div class="logo-icon"><i class="fas fa-wallet"></i></div>
+                <div class="logo-text">
+                    <strong>FinTrack</strong>
+                    <span>Keuangan Pribadi</span>
                 </div>
             </div>
-        </aside>
-
-        <!-- OVERLAY -->
-        <div class="sidebar-overlay" id="sidebarOverlay"></div>
-
-        <!-- MAIN CONTENT -->
-        <main class="main-content">
-
-            <!-- TOPBAR -->
-            <header class="topbar">
-                <div class="topbar-left">
-                    <button class="mobile-menu-btn" id="mobileMenuBtn" type="button"><i class="fas fa-bars"></i></button>
-                    <div class="page-heading">
-                        <span id="pageGreeting">Selamat datang kembali 👋</span>
-                        <h1 id="pageTitle">Dashboard</h1>
-                    </div>
-                </div>
-                <div class="topbar-right">
-                    <div class="current-date"><i class="far fa-calendar"></i> <span id="currentDate">-</span></div>
-                    <button class="topbar-add-btn" id="btnTambahTransaksiTop" type="button">
-                        <i class="fas fa-plus"></i> <span>Tambah</span>
-                    </button>
-                </div>
-            </header>
-
-            <!-- PAGE: DASHBOARD -->
-            <section class="page-section active" id="page-dashboard">
-                <div class="section-header dashboard-header">
-                    <div>
-                        <span class="section-eyebrow">RINGKASAN KEUANGAN</span>
-                        <h2>Kondisi keuanganmu</h2>
-                        <p>Pantau saldo, pemasukan, pengeluaran, dan target tabunganmu dalam satu tempat.</p>
-                    </div>
-                    <div class="period-selector">
-                        <button class="period-btn active" data-period="bulan" type="button">Bulan Ini</button>
-                        <button class="period-btn" data-period="semua" type="button">Semua</button>
-                    </div>
-                </div>
-
-                <!-- BALANCE CARD -->
-                <div class="balance-card">
-                    <div class="balance-info">
-                        <span class="balance-label">TOTAL SALDO</span>
-                        <div class="balance-value-row">
-                            <h2 id="totalSaldo">Rp 0</h2>
-                            <span class="balance-badge" id="saldoBadge"><i class="fas fa-minus"></i> 0%</span>
-                        </div>
-                        <p class="balance-desc">Saldo berdasarkan seluruh pemasukan dan pengeluaran yang tercatat.</p>
-                    </div>
-                    <div class="balance-icon"><i class="fas fa-wallet"></i></div>
-                    <div class="balance-trend" id="trendSaldo"><i class="fas fa-arrow-up"></i> <span>Keuangan terpantau</span></div>
-                </div>
-
-                <!-- STATS -->
-                <div class="stats-grid">
-                    <div class="stat-card income-card">
-                        <div class="stat-top">
-                            <div class="stat-icon"><i class="fas fa-arrow-down"></i></div>
-                            <span class="stat-label">PEMASUKAN</span>
-                        </div>
-                        <div class="stat-main">
-                            <h3 id="totalPemasukan">Rp 0</h3>
-                            <span class="stat-count"><span id="jmlPemasukan">0</span> transaksi</span>
-                        </div>
-                        <div class="mini-chart"><div class="chart-line" id="chartPemasukan"></div></div>
-                    </div>
-                    <div class="stat-card expense-card">
-                        <div class="stat-top">
-                            <div class="stat-icon"><i class="fas fa-arrow-up"></i></div>
-                            <span class="stat-label">PENGELUARAN</span>
-                        </div>
-                        <div class="stat-main">
-                            <h3 id="totalPengeluaran">Rp 0</h3>
-                            <span class="stat-count"><span id="jmlPengeluaran">0</span> transaksi</span>
-                        </div>
-                        <div class="mini-chart"><div class="chart-line" id="chartPengeluaran"></div></div>
-                    </div>
-                </div>
-
-                <!-- DASHBOARD GRID -->
-                <div class="dashboard-grid">
-                    <!-- KATEGORI - PIE CHART -->
-                    <div class="dashboard-card category-card">
-                        <div class="card-header">
-                            <div>
-                                <span class="card-eyebrow">ANALISIS</span>
-                                <h3>Pengeluaran per Kategori</h3>
-                            </div>
-                            <div class="card-header-icon"><i class="fas fa-chart-pie"></i></div>
-                        </div>
-                        <div class="category-content">
-                            <div class="category-chart" id="kategoriChart">
-                                <canvas id="pieChart" width="200" height="200"></canvas>
-                            </div>
-                            <div class="category-top" id="kategoriTeratas"></div>
-                        </div>
-                    </div>
-
-                    <!-- TARGET -->
-                    <div class="dashboard-card target-card">
-                        <div class="card-header">
-                            <div>
-                                <span class="card-eyebrow">TARGET TABUNGAN</span>
-                                <h3><span id="targetNamaDashboard">Tabungan Darurat</span></h3>
-                            </div>
-                            <div class="target-status"><span id="targetStatus">0%</span></div>
-                        </div>
-                        <div class="target-dashboard-content">
-                            <div class="target-money">
-                                <strong id="targetNominal">Rp 0</strong>
-                                <span id="targetDesc">dari target Rp 10.000.000</span>
-                            </div>
-                            <div class="target-progress-wrap">
-                                <div class="target-progress-bar">
-                                    <div class="target-progress" id="targetProgress" style="width:0%;"></div>
-                                </div>
-                                <div class="target-progress-label">
-                                    <span>Progress</span>
-                                    <strong id="targetProgressDashboard">0%</strong>
-                                </div>
-                            </div>
-                            <div class="target-dashboard-footer">
-                                <span id="targetSisaDashboard">Sisa Rp 10.000.000</span>
-                                <button class="target-manage-btn" id="btnEditTarget" type="button">Atur Target <i class="fas fa-arrow-right"></i></button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- HISTORY -->
-                <div class="dashboard-card history-card">
-                    <div class="card-header">
-                        <div>
-                            <span class="card-eyebrow">AKTIVITAS</span>
-                            <h3>Riwayat Transaksi</h3>
-                        </div>
-                        <div class="history-tools">
-                            <select id="filterKategori" class="filter-select">
-                                <option value="semua">Semua Kategori</option>
-                                <option value="makanan">Makanan</option>
-                                <option value="transportasi">Transportasi</option>
-                                <option value="belanja">Belanja</option>
-                                <option value="tagihan">Tagihan</option>
-                                <option value="hiburan">Hiburan</option>
-                                <option value="pendidikan">Pendidikan</option>
-                                <option value="kesehatan">Kesehatan</option>
-                                <option value="lainnya">Lainnya</option>
-                            </select>
-                            <button class="view-all-btn" data-page-link="transaksi" type="button">Lihat semua <i class="fas fa-arrow-right"></i></button>
-                        </div>
-                    </div>
-                    <div class="history-table-wrap">
-                        <table class="history-table">
-                            <thead>
-                                <tr>
-                                    <th>TRANSAKSI</th>
-                                    <th>KATEGORI</th>
-                                    <th>TANGGAL</th>
-                                    <th>NOMINAL</th>
-                                    <th>AKSI</th>
-                                </tr>
-                            </thead>
-                            <tbody id="historyTable"></tbody>
-                        </table>
-                    </div>
-                    <div class="history-footer">
-                        <span>Menampilkan <strong id="jmlRiwayat">0</strong> transaksi</span>
-                    </div>
-                </div>
-            </section>
-
-            <!-- PAGE: TRANSAKSI -->
-            <section class="page-section" id="page-transaksi">
-                <div class="section-header">
-                    <div>
-                        <span class="section-eyebrow">KEUANGAN</span>
-                        <h2>Semua Transaksi</h2>
-                        <p>Kelola seluruh pemasukan dan pengeluaranmu.</p>
-                    </div>
-                    <button class="btn-add" id="btnTambahDariPage" type="button"><i class="fas fa-plus"></i> Tambah Transaksi</button>
-                </div>
-                <div class="dashboard-card all-transaksi-card">
-                    <div class="card-header">
-                        <div>
-                            <span class="card-eyebrow">RIWAYAT</span>
-                            <h3>Daftar Transaksi</h3>
-                        </div>
-                        <div class="transaction-page-filter">
-                            <select id="filterTransaksiPage" class="filter-select">
-                                <option value="semua">Semua</option>
-                                <option value="pemasukan">Pemasukan</option>
-                                <option value="pengeluaran">Pengeluaran</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="all-transaksi-list" id="allTransaksiList"></div>
-                </div>
-            </section>
-
-            <!-- PAGE: TARGET -->
-            <section class="page-section" id="page-target">
-                <div class="section-header">
-                    <div>
-                        <span class="section-eyebrow">PERENCANAAN</span>
-                        <h2>Target Tabungan</h2>
-                        <p>Buat target dan pantau perkembangan tabunganmu secara terpisah dari transaksi harian.</p>
-                    </div>
-                </div>
-                <div class="target-page-grid">
-                    <div class="dashboard-card target-settings-card">
-                        <div class="card-header">
-                            <div>
-                                <span class="card-eyebrow">TARGET</span>
-                                <h3>Pengaturan Target</h3>
-                            </div>
-                            <div class="card-header-icon"><i class="fas fa-bullseye"></i></div>
-                        </div>
-                        <div class="target-form">
-                            <div class="form-group">
-                                <label for="targetNamaInput">Nama Target</label>
-                                <input type="text" id="targetNamaInput" placeholder="Contoh: Laptop Baru" autocomplete="off" />
-                            </div>
-                            <div class="form-group">
-                                <label for="targetNominalInput">Nominal Target</label>
-                                <div class="input-money">
-                                    <span>Rp</span>
-                                    <input type="number" id="targetNominalInput" placeholder="10000000" min="1" step="1000" />
-                                </div>
-                            </div>
-                            <button class="btn-add" id="btnSimpanTarget" type="button"><i class="fas fa-save"></i> Simpan Target</button>
-                        </div>
-                    </div>
-                    <div class="dashboard-card target-progress-card">
-                        <div class="card-header">
-                            <div>
-                                <span class="card-eyebrow">PERKEMBANGAN</span>
-                                <h3 id="targetPageNama">Tabungan Darurat</h3>
-                            </div>
-                            <div class="target-page-percent" id="targetProgressText">0%</div>
-                        </div>
-                        <div class="target-progress-big">
-                            <div class="target-progress-bar large">
-                                <div class="target-progress" id="targetProgress2" style="width:0%;"></div>
-                            </div>
-                        </div>
-                        <div class="target-money-summary">
-                            <div class="target-summary-item">
-                                <span>Sudah ditabung</span>
-                                <strong id="targetTerkumpul">Rp 0</strong>
-                            </div>
-                            <div class="target-summary-item">
-                                <span>Sisa target</span>
-                                <strong id="targetSisa">sisa Rp 10.000.000</strong>
-                            </div>
-                        </div>
-                        <div class="target-status-message">
-                            <i class="fas fa-flag"></i>
-                            <span id="targetPageStatus">🌱 Baru mulai</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="dashboard-card target-saving-card">
-                    <div class="card-header">
-                        <div>
-                            <span class="card-eyebrow">MENABUNG</span>
-                            <h3>Tambahkan Tabungan</h3>
-                            <p class="card-subtitle">Catat uang yang benar-benar kamu sisihkan untuk mencapai target.</p>
-                        </div>
-                        <button class="btn-add target-save-money-btn" id="btnTambahTabungan" type="button"><i class="fas fa-plus"></i> Tambah Tabungan</button>
-                    </div>
-                    <div class="saving-info-box">
-                        <div class="saving-info-icon"><i class="fas fa-piggy-bank"></i></div>
-                        <div>
-                            <strong>Tabungan target terpisah</strong>
-                            <p>Setoran di sini tidak dihitung sebagai pemasukan baru dan tidak menambah jumlah transaksi utama.</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="dashboard-card target-history-card">
-                    <div class="card-header">
-                        <div>
-                            <span class="card-eyebrow">AKTIVITAS TARGET</span>
-                            <h3>Riwayat Menabung</h3>
-                        </div>
-                        <span class="history-count" id="jmlTabungan">0 setoran</span>
-                    </div>
-                    <div class="tabungan-history" id="tabunganHistory"></div>
-                </div>
-            </section>
-
-            <!-- PAGE: LAPORAN -->
-            <section class="page-section" id="page-laporan">
-                <div class="section-header">
-                    <div>
-                        <span class="section-eyebrow">ANALISIS</span>
-                        <h2>Laporan Keuangan</h2>
-                        <p>Lihat ringkasan kondisi keuangan berdasarkan periode bulanan.</p>
-                    </div>
-                </div>
-                <div class="dashboard-card laporan-card">
-                    <div class="laporan-header">
-                        <button class="laporan-nav-btn" id="laporanPrev" type="button"><i class="fas fa-chevron-left"></i></button>
-                        <div class="laporan-month">
-                            <span>LAPORAN BULAN</span>
-                            <h3 id="laporanLabelBulan">-</h3>
-                        </div>
-                        <button class="laporan-nav-btn" id="laporanNext" type="button"><i class="fas fa-chevron-right"></i></button>
-                    </div>
-                    <div class="laporan-ringkasan" id="laporanRingkasan"></div>
-                    <div class="laporan-bulanan">
-                        <canvas id="barChart" width="400" height="200"></canvas>
-                    </div>
-                </div>
-            </section>
-
-        </main>
-    </div>
-
-    <!-- MODAL TRANSAKSI -->
-    <div class="modal-overlay" id="modalTransaksi" aria-hidden="true">
-        <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-            <div class="modal-header">
-                <div>
-                    <span class="modal-eyebrow">KEUANGAN</span>
-                    <h2 id="modalTitle">Tambah Transaksi</h2>
-                </div>
-                <button class="modal-close" id="modalClose" type="button"><i class="fas fa-times"></i></button>
-            </div>
-            <form id="formTransaksi">
-                <div class="form-group">
-                    <label>Jenis Transaksi</label>
-                    <div class="transaction-type">
-                        <label class="type-option income-option">
-                            <input type="radio" name="jenis" value="pemasukan" checked />
-                            <span><i class="fas fa-arrow-down"></i> Pemasukan</span>
-                        </label>
-                        <label class="type-option expense-option">
-                            <input type="radio" name="jenis" value="pengeluaran" />
-                            <span><i class="fas fa-arrow-up"></i> Pengeluaran</span>
-                        </label>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="fKeterangan">Keterangan</label>
-                    <input type="text" id="fKeterangan" placeholder="Contoh: Gaji bulan September" autocomplete="off" required />
-                </div>
-                <div class="form-group">
-                    <label for="fNominal">Nominal</label>
-                    <div class="input-money">
-                        <span>Rp</span>
-                        <input type="number" id="fNominal" placeholder="0" min="1" step="1000" required />
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="fKategori">Kategori</label>
-                    <select id="fKategori" required>
-                        <option value="makanan">Makanan</option>
-                        <option value="transportasi">Transportasi</option>
-                        <option value="belanja">Belanja</option>
-                        <option value="tagihan">Tagihan</option>
-                        <option value="hiburan">Hiburan</option>
-                        <option value="pendidikan">Pendidikan</option>
-                        <option value="kesehatan">Kesehatan</option>
-                        <option value="gaji">Gaji</option>
-                        <option value="bonus">Bonus</option>
-                        <option value="lainnya">Lainnya</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="fTanggal">Tanggal</label>
-                    <input type="date" id="fTanggal" required />
-                </div>
-                <div class="modal-actions">
-                    <button class="btn-cancel" id="modalCancel" type="button">Batal</button>
-                    <button class="btn-submit" type="submit"><i class="fas fa-save"></i> Simpan Transaksi</button>
-                </div>
-            </form>
+            <button class="sidebar-close" id="sidebarClose" type="button"><i class="fas fa-times"></i></button>
         </div>
-    </div>
+        <nav class="sidebar-nav">
+            <div class="nav-label">MENU UTAMA</div>
+            <button class="nav-item active" data-page="dashboard" type="button">
+                <i class="fas fa-chart-pie"></i> <span>Dashboard</span>
+            </button>
+            <button class="nav-item" data-page="transaksi" type="button">
+                <i class="fas fa-arrow-right-arrow-left"></i> <span>Transaksi</span>
+            </button>
+            <button class="nav-item" data-page="target" type="button">
+                <i class="fas fa-bullseye"></i> <span>Target</span>
+            </button>
+            <button class="nav-item" data-page="laporan" type="button">
+                <i class="fas fa-file-lines"></i> <span>Laporan</span>
+            </button>
+        </nav>
+        <div class="sidebar-footer">
+            <div class="sidebar-tip">
+                <div class="tip-icon"><i class="fas fa-lightbulb"></i></div>
+                <div>
+                    <strong>Tips</strong>
+                    <p>Catat setiap transaksi agar kondisi keuanganmu tetap terkontrol.</p>
+                </div>
+            </div>
+        </div>
+    </aside>
 
-    <!-- MODAL TABUNGAN -->
-    <div class="modal-overlay" id="modalTabungan" aria-hidden="true">
-        <div class="modal-content saving-modal" role="dialog" aria-modal="true" aria-labelledby="tabunganModalTitle">
-            <div class="modal-header">
-                <div>
-                    <span class="modal-eyebrow">TARGET TABUNGAN</span>
-                    <h2 id="tabunganModalTitle">Tambah Tabungan</h2>
-                </div>
-                <button class="modal-close" id="tabunganModalClose" type="button"><i class="fas fa-times"></i></button>
-            </div>
-            <div class="saving-modal-intro">
-                <div class="saving-modal-icon"><i class="fas fa-piggy-bank"></i></div>
-                <div>
-                    <strong>Catat setoranmu</strong>
-                    <p>Masukkan nominal yang kamu sisihkan untuk target <span id="tabunganTargetName">Tabungan Darurat</span>.</p>
+    <!-- OVERLAY -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+
+        <!-- TOPBAR -->
+        <header class="topbar">
+            <div class="topbar-left">
+                <button class="mobile-menu-btn" id="mobileMenuBtn" type="button"><i class="fas fa-bars"></i></button>
+                <div class="page-heading">
+                    <span id="pageGreeting">Selamat datang kembali 👋</span>
+                    <h1 id="pageTitle">Dashboard</h1>
                 </div>
             </div>
-            <form id="formTabungan" novalidate>
-                <div class="form-group">
-                    <label for="tabunganNominal">Nominal Tabungan</label>
-                    <div class="input-money">
-                        <span>Rp</span>
-                        <input
-                            type="text"
-                            id="tabunganNominal"
-                            placeholder="0"
-                            inputmode="numeric"
-                            pattern="[0-9]*"
-                            autocomplete="off"
-                            required
-                        />
+            <div class="topbar-right">
+                <div class="current-date"><i class="far fa-calendar"></i> <span id="currentDate">-</span></div>
+                <button class="topbar-add-btn" id="btnTambahTransaksiTop" type="button">
+                    <i class="fas fa-plus"></i> <span>Tambah</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- PAGE: DASHBOARD -->
+        <section class="page-section active" id="page-dashboard">
+            <div class="section-header dashboard-header">
+                <div>
+                    <span class="section-eyebrow">RINGKASAN KEUANGAN</span>
+                    <h2>Kondisi keuanganmu</h2>
+                    <p>Pantau saldo, pemasukan, pengeluaran, dan target tabunganmu dalam satu tempat.</p>
+                </div>
+                <div class="period-selector">
+                    <button class="period-btn active" data-period="bulan" type="button">Bulan Ini</button>
+                    <button class="period-btn" data-period="semua" type="button">Semua</button>
+                </div>
+            </div>
+
+            <!-- BALANCE CARD -->
+            <div class="balance-card">
+                <div class="balance-info">
+                    <span class="balance-label">TOTAL SALDO</span>
+                    <div class="balance-value-row">
+                        <h2 id="totalSaldo">Rp 0</h2>
+                        <span class="balance-badge" id="saldoBadge"><i class="fas fa-minus"></i> 0%</span>
+                    </div>
+                    <p class="balance-desc">Saldo berdasarkan seluruh pemasukan dan pengeluaran yang tercatat.</p>
+                </div>
+                <div class="balance-icon"><i class="fas fa-wallet"></i></div>
+                <div class="balance-trend" id="trendSaldo"><i class="fas fa-arrow-up"></i> <span>Keuangan terpantau</span></div>
+            </div>
+
+            <!-- STATS -->
+            <div class="stats-grid">
+                <div class="stat-card income-card">
+                    <div class="stat-top">
+                        <div class="stat-icon"><i class="fas fa-arrow-down"></i></div>
+                        <span class="stat-label">PEMASUKAN</span>
+                    </div>
+                    <div class="stat-main">
+                        <h3 id="totalPemasukan">Rp 0</h3>
+                        <span class="stat-count"><span id="jmlPemasukan">0</span> transaksi</span>
+                    </div>
+                    <div class="mini-chart"><div class="chart-line" id="chartPemasukan"></div></div>
+                </div>
+                <div class="stat-card expense-card">
+                    <div class="stat-top">
+                        <div class="stat-icon"><i class="fas fa-arrow-up"></i></div>
+                        <span class="stat-label">PENGELUARAN</span>
+                    </div>
+                    <div class="stat-main">
+                        <h3 id="totalPengeluaran">Rp 0</h3>
+                        <span class="stat-count"><span id="jmlPengeluaran">0</span> transaksi</span>
+                    </div>
+                    <div class="mini-chart"><div class="chart-line" id="chartPengeluaran"></div></div>
+                </div>
+            </div>
+
+            <!-- DASHBOARD GRID -->
+            <div class="dashboard-grid">
+                <!-- KATEGORI - Manual Bar -->
+                <div class="dashboard-card category-card">
+                    <div class="card-header">
+                        <div>
+                            <span class="card-eyebrow">ANALISIS</span>
+                            <h3>Pengeluaran per Kategori</h3>
+                        </div>
+                        <div class="card-header-icon"><i class="fas fa-chart-bar"></i></div>
+                    </div>
+                    <div class="category-content">
+                        <div class="category-chart" id="kategoriChart"></div>
+                        <div class="category-top" id="kategoriTeratas"></div>
                     </div>
                 </div>
-                <div class="form-group">
-                    <label for="tabunganTanggal">Tanggal</label>
-                    <input type="date" id="tabunganTanggal" required />
+
+                <!-- TARGET -->
+                <div class="dashboard-card target-card">
+                    <div class="card-header">
+                        <div>
+                            <span class="card-eyebrow">TARGET TABUNGAN</span>
+                            <h3><span id="targetNamaDashboard">Tabungan Darurat</span></h3>
+                        </div>
+                        <div class="target-status"><span id="targetStatus">0%</span></div>
+                    </div>
+                    <div class="target-dashboard-content">
+                        <div class="target-money">
+                            <strong id="targetNominal">Rp 0</strong>
+                            <span id="targetDesc">dari target Rp 10.000.000</span>
+                        </div>
+                        <div class="target-progress-wrap">
+                            <div class="target-progress-bar">
+                                <div class="target-progress" id="targetProgress" style="width:0%;"></div>
+                            </div>
+                            <div class="target-progress-label">
+                                <span>Progress</span>
+                                <strong id="targetProgressDashboard">0%</strong>
+                            </div>
+                        </div>
+                        <div class="target-dashboard-footer">
+                            <span id="targetSisaDashboard">Sisa Rp 10.000.000</span>
+                            <button class="target-manage-btn" id="btnEditTarget" type="button">Atur Target <i class="fas fa-arrow-right"></i></button>
+                        </div>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="tabunganCatatan">Catatan <span class="optional-label">Opsional</span></label>
-                    <textarea id="tabunganCatatan" rows="3" placeholder="Contoh: Menabung dari uang lembur"></textarea>
+            </div>
+
+            <!-- HISTORY -->
+            <div class="dashboard-card history-card">
+                <div class="card-header">
+                    <div>
+                        <span class="card-eyebrow">AKTIVITAS</span>
+                        <h3>Riwayat Transaksi</h3>
+                    </div>
+                    <div class="history-tools">
+                        <select id="filterKategori" class="filter-select">
+                            <option value="semua">Semua Kategori</option>
+                            <option value="makanan">Makanan</option>
+                            <option value="transportasi">Transportasi</option>
+                            <option value="belanja">Belanja</option>
+                            <option value="tagihan">Tagihan</option>
+                            <option value="hiburan">Hiburan</option>
+                            <option value="pendidikan">Pendidikan</option>
+                            <option value="kesehatan">Kesehatan</option>
+                            <option value="lainnya">Lainnya</option>
+                        </select>
+                        <button class="view-all-btn" data-page-link="transaksi" type="button">Lihat semua <i class="fas fa-arrow-right"></i></button>
+                    </div>
                 </div>
-                <div class="modal-actions">
-                    <button class="btn-cancel" id="tabunganModalCancel" type="button">Batal</button>
-                    <button class="btn-submit" type="submit"><i class="fas fa-piggy-bank"></i> Simpan Tabungan</button>
+                <div class="history-table-wrap">
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th>TRANSAKSI</th>
+                                <th>KATEGORI</th>
+                                <th>TANGGAL</th>
+                                <th>NOMINAL</th>
+                                <th>AKSI</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTable"></tbody>
+                    </table>
                 </div>
-            </form>
+                <div class="history-footer">
+                    <span>Menampilkan <strong id="jmlRiwayat">0</strong> transaksi</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- PAGE: TRANSAKSI -->
+        <section class="page-section" id="page-transaksi">
+            <div class="section-header">
+                <div>
+                    <span class="section-eyebrow">KEUANGAN</span>
+                    <h2>Semua Transaksi</h2>
+                    <p>Kelola seluruh pemasukan dan pengeluaranmu.</p>
+                </div>
+                <button class="btn-add" id="btnTambahDariPage" type="button"><i class="fas fa-plus"></i> Tambah Transaksi</button>
+            </div>
+            <div class="dashboard-card all-transaksi-card">
+                <div class="card-header">
+                    <div>
+                        <span class="card-eyebrow">RIWAYAT</span>
+                        <h3>Daftar Transaksi</h3>
+                    </div>
+                    <div class="transaction-page-filter">
+                        <select id="filterTransaksiPage" class="filter-select">
+                            <option value="semua">Semua</option>
+                            <option value="pemasukan">Pemasukan</option>
+                            <option value="pengeluaran">Pengeluaran</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="all-transaksi-list" id="allTransaksiList"></div>
+            </div>
+        </section>
+
+        <!-- PAGE: TARGET -->
+        <section class="page-section" id="page-target">
+            <div class="section-header">
+                <div>
+                    <span class="section-eyebrow">PERENCANAAN</span>
+                    <h2>Target Tabungan</h2>
+                    <p>Buat target dan pantau perkembangan tabunganmu secara terpisah dari transaksi harian.</p>
+                </div>
+            </div>
+            <div class="target-page-grid">
+                <div class="dashboard-card target-settings-card">
+                    <div class="card-header">
+                        <div>
+                            <span class="card-eyebrow">TARGET</span>
+                            <h3>Pengaturan Target</h3>
+                        </div>
+                        <div class="card-header-icon"><i class="fas fa-bullseye"></i></div>
+                    </div>
+                    <div class="target-form">
+                        <div class="form-group">
+                            <label for="targetNamaInput">Nama Target</label>
+                            <input type="text" id="targetNamaInput" placeholder="Contoh: Laptop Baru" autocomplete="off" />
+                        </div>
+                        <div class="form-group">
+                            <label for="targetNominalInput">Nominal Target</label>
+                            <div class="input-money">
+                                <span>Rp</span>
+                                <input type="number" id="targetNominalInput" placeholder="10000000" min="1" step="1000" />
+                            </div>
+                        </div>
+                        <button class="btn-add" id="btnSimpanTarget" type="button"><i class="fas fa-save"></i> Simpan Target</button>
+                    </div>
+                </div>
+                <div class="dashboard-card target-progress-card">
+                    <div class="card-header">
+                        <div>
+                            <span class="card-eyebrow">PERKEMBANGAN</span>
+                            <h3 id="targetPageNama">Tabungan Darurat</h3>
+                        </div>
+                        <div class="target-page-percent" id="targetProgressText">0%</div>
+                    </div>
+                    <div class="target-progress-big">
+                        <div class="target-progress-bar large">
+                            <div class="target-progress" id="targetProgress2" style="width:0%;"></div>
+                        </div>
+                    </div>
+                    <div class="target-money-summary">
+                        <div class="target-summary-item">
+                            <span>Sudah ditabung</span>
+                            <strong id="targetTerkumpul">Rp 0</strong>
+                        </div>
+                        <div class="target-summary-item">
+                            <span>Sisa target</span>
+                            <strong id="targetSisa">sisa Rp 10.000.000</strong>
+                        </div>
+                    </div>
+                    <div class="target-status-message">
+                        <i class="fas fa-flag"></i>
+                        <span id="targetPageStatus">🌱 Baru mulai</span>
+                    </div>
+                </div>
+            </div>
+            <div class="dashboard-card target-saving-card">
+                <div class="card-header">
+                    <div>
+                        <span class="card-eyebrow">MENABUNG</span>
+                        <h3>Tambahkan Tabungan</h3>
+                        <p class="card-subtitle">Catat uang yang benar-benar kamu sisihkan untuk mencapai target.</p>
+                    </div>
+                    <button class="btn-add target-save-money-btn" id="btnTambahTabungan" type="button"><i class="fas fa-plus"></i> Tambah Tabungan</button>
+                </div>
+                <div class="saving-info-box">
+                    <div class="saving-info-icon"><i class="fas fa-piggy-bank"></i></div>
+                    <div>
+                        <strong>Tabungan target terpisah</strong>
+                        <p>Setoran di sini tidak dihitung sebagai pemasukan baru dan tidak menambah jumlah transaksi utama.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="dashboard-card target-history-card">
+                <div class="card-header">
+                    <div>
+                        <span class="card-eyebrow">AKTIVITAS TARGET</span>
+                        <h3>Riwayat Menabung</h3>
+                    </div>
+                    <span class="history-count" id="jmlTabungan">0 setoran</span>
+                </div>
+                <div class="tabungan-history" id="tabunganHistory"></div>
+            </div>
+        </section>
+
+        <!-- PAGE: LAPORAN -->
+        <section class="page-section" id="page-laporan">
+            <div class="section-header">
+                <div>
+                    <span class="section-eyebrow">ANALISIS</span>
+                    <h2>Laporan Keuangan</h2>
+                    <p>Lihat ringkasan kondisi keuangan berdasarkan periode bulanan.</p>
+                </div>
+            </div>
+            <div class="dashboard-card laporan-card">
+                <div class="laporan-header">
+                    <button class="laporan-nav-btn" id="laporanPrev" type="button"><i class="fas fa-chevron-left"></i></button>
+                    <div class="laporan-month">
+                        <span>LAPORAN BULAN</span>
+                        <h3 id="laporanLabelBulan">-</h3>
+                    </div>
+                    <button class="laporan-nav-btn" id="laporanNext" type="button"><i class="fas fa-chevron-right"></i></button>
+                </div>
+                <div class="laporan-ringkasan" id="laporanRingkasan"></div>
+                <div class="laporan-bulanan" id="laporanBulanan"></div>
+            </div>
+        </section>
+
+    </main>
+</div>
+
+<!-- MODAL TRANSAKSI -->
+<div class="modal-overlay" id="modalTransaksi" aria-hidden="true">
+    <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <div class="modal-header">
+            <div>
+                <span class="modal-eyebrow">KEUANGAN</span>
+                <h2 id="modalTitle">Tambah Transaksi</h2>
+            </div>
+            <button class="modal-close" id="modalClose" type="button"><i class="fas fa-times"></i></button>
         </div>
+        <form id="formTransaksi">
+            <div class="form-group">
+                <label>Jenis Transaksi</label>
+                <div class="transaction-type">
+                    <label class="type-option income-option">
+                        <input type="radio" name="jenis" value="pemasukan" checked />
+                        <span><i class="fas fa-arrow-down"></i> Pemasukan</span>
+                    </label>
+                    <label class="type-option expense-option">
+                        <input type="radio" name="jenis" value="pengeluaran" />
+                        <span><i class="fas fa-arrow-up"></i> Pengeluaran</span>
+                    </label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="fKeterangan">Keterangan</label>
+                <input type="text" id="fKeterangan" placeholder="Contoh: Gaji bulan September" autocomplete="off" required />
+            </div>
+            <div class="form-group">
+                <label for="fNominal">Nominal</label>
+                <div class="input-money">
+                    <span>Rp</span>
+                    <input type="number" id="fNominal" placeholder="0" min="1" step="1000" required />
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="fKategori">Kategori</label>
+                <select id="fKategori" required>
+                    <option value="makanan">Makanan</option>
+                    <option value="transportasi">Transportasi</option>
+                    <option value="belanja">Belanja</option>
+                    <option value="tagihan">Tagihan</option>
+                    <option value="hiburan">Hiburan</option>
+                    <option value="pendidikan">Pendidikan</option>
+                    <option value="kesehatan">Kesehatan</option>
+                    <option value="gaji">Gaji</option>
+                    <option value="bonus">Bonus</option>
+                    <option value="lainnya">Lainnya</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="fTanggal">Tanggal</label>
+                <input type="date" id="fTanggal" required />
+            </div>
+            <div class="modal-actions">
+                <button class="btn-cancel" id="modalCancel" type="button">Batal</button>
+                <button class="btn-submit" type="submit"><i class="fas fa-save"></i> Simpan Transaksi</button>
+            </div>
+        </form>
     </div>
+</div>
 
-    <div class="toast-container" id="toastContainer"></div>
+<!-- MODAL TABUNGAN -->
+<div class="modal-overlay" id="modalTabungan" aria-hidden="true">
+    <div class="modal-content saving-modal" role="dialog" aria-modal="true" aria-labelledby="tabunganModalTitle">
+        <div class="modal-header">
+            <div>
+                <span class="modal-eyebrow">TARGET TABUNGAN</span>
+                <h2 id="tabunganModalTitle">Tambah Tabungan</h2>
+            </div>
+            <button class="modal-close" id="tabunganModalClose" type="button"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="saving-modal-intro">
+            <div class="saving-modal-icon"><i class="fas fa-piggy-bank"></i></div>
+            <div>
+                <strong>Catat setoranmu</strong>
+                <p>Masukkan nominal yang kamu sisihkan untuk target <span id="tabunganTargetName">Tabungan Darurat</span>.</p>
+            </div>
+        </div>
+        <form id="formTabungan" novalidate>
+            <div class="form-group">
+                <label for="tabunganNominal">Nominal Tabungan</label>
+                <div class="input-money">
+                    <span>Rp</span>
+                    <input
+                        type="text"
+                        id="tabunganNominal"
+                        placeholder="0"
+                        inputmode="numeric"
+                        pattern="[0-9]*"
+                        autocomplete="off"
+                        required
+                    />
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="tabunganTanggal">Tanggal</label>
+                <input type="date" id="tabunganTanggal" required />
+            </div>
+            <div class="form-group">
+                <label for="tabunganCatatan">Catatan <span class="optional-label">Opsional</span></label>
+                <textarea id="tabunganCatatan" rows="3" placeholder="Contoh: Menabung dari uang lembur"></textarea>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-cancel" id="tabunganModalCancel" type="button">Batal</button>
+                <button class="btn-submit" type="submit"><i class="fas fa-piggy-bank"></i> Simpan Tabungan</button>
+            </div>
+        </form>
+    </div>
+</div>
 
-    <script src="js/script.js"></script>
+<script src="js/script.js"></script>
 </body>
 </html>
