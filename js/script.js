@@ -1,6 +1,10 @@
 // ================================================================
 //  KEUANGAN PRIBADI — SCRIPT.JS
-//  VERSI DENGAN CHART.JS (PIE & BAR CHART)
+//  VERSI FINAL — SEMUA FITUR BERFUNGSI
+//  - Input tabungan pakai type="text" + parsing angka
+//  - Chart.js (pie chart & bar chart)
+//  - Filter kategori & jenis transaksi
+//  - CRUD transaksi & tabungan
 // ================================================================
 
 // STATE
@@ -22,6 +26,7 @@ const $$ = (s) => document.querySelectorAll(s);
 
 // DOM
 const dom = {
+    // Saldo & statistik
     saldo: $('#totalSaldo'),
     pemasukan: $('#totalPemasukan'),
     pengeluaran: $('#totalPengeluaran'),
@@ -29,12 +34,18 @@ const dom = {
     jmlPengeluaran: $('#jmlPengeluaran'),
     saldoBadge: $('#saldoBadge'),
     trendSaldo: $('#trendSaldo'),
+    currentDate: $('#currentDate'),
+
+    // History (dashboard)
     historyTable: $('#historyTable'),
     jmlRiwayat: $('#jmlRiwayat'),
     filterKategori: $('#filterKategori'),
+
+    // All transactions (halaman transaksi)
     allTransaksiList: $('#allTransaksiList'),
     filterTransaksiPage: $('#filterTransaksiPage'),
 
+    // Target
     targetNominal: $('#targetNominal'),
     targetDesc: $('#targetDesc'),
     targetProgress: $('#targetProgress'),
@@ -53,10 +64,12 @@ const dom = {
     targetSisaDashboard: $('#targetSisaDashboard'),
     targetProgressDashboard: $('#targetProgressDashboard'),
 
+    // Laporan
     laporanBulanan: $('#laporanBulanan'),
     laporanRingkasan: $('#laporanRingkasan'),
     laporanLabelBulan: $('#laporanLabelBulan'),
 
+    // Modal transaksi
     modal: $('#modalTransaksi'),
     modalTitle: $('#modalTitle'),
     form: $('#formTransaksi'),
@@ -67,13 +80,16 @@ const dom = {
     modalClose: $('#modalClose'),
     modalCancel: $('#modalCancel'),
 
+    // Tombol tambah transaksi
     btnTambah: $('#btnTambahTransaksiTop'),
     btnTambahPage: $('#btnTambahDariPage'),
 
+    // Target buttons
     btnSimpanTarget: $('#btnSimpanTarget'),
     btnEditTarget: $('#btnEditTarget'),
     btnTambahTabungan: $('#btnTambahTabungan'),
 
+    // Modal tabungan
     modalTabungan: $('#modalTabungan'),
     modalTabunganTitle: $('#tabunganModalTitle'),
     formTabungan: $('#formTabungan'),
@@ -83,15 +99,17 @@ const dom = {
     modalTabunganClose: $('#tabunganModalClose'),
     modalTabunganCancel: $('#tabunganModalCancel'),
 
-    currentDate: $('#currentDate'),
+    // Period & page
     periodBtns: $$('.period-btn'),
     pageTitle: $('#pageTitle'),
-    kategoriChart: $('#kategoriChart'),
-    kategoriTeratas: $('#kategoriTeratas'),
 
-    // Canvas untuk chart
+    // Chart canvas
     pieCanvas: document.getElementById('pieChart'),
     barCanvas: document.getElementById('barChart'),
+
+    // Kategori display
+    kategoriChart: $('#kategoriChart'),
+    kategoriTeratas: $('#kategoriTeratas'),
 };
 
 // ================================================================
@@ -381,6 +399,7 @@ function renderTarget() {
     const progress = nominalTarget > 0 ? Math.min(100, (totalTabungan / nominalTarget) * 100) : 0;
     const sisa = Math.max(0, nominalTarget - totalTabungan);
 
+    // Dashboard
     if (dom.targetNominal) dom.targetNominal.textContent = 'Rp ' + formatRupiah(totalTabungan);
     if (dom.targetDesc) dom.targetDesc.textContent = 'dari target Rp ' + formatRupiah(nominalTarget);
     if (dom.targetProgress) dom.targetProgress.style.width = progress + '%';
@@ -389,6 +408,7 @@ function renderTarget() {
     if (dom.targetProgressDashboard) dom.targetProgressDashboard.textContent = progress.toFixed(1) + '%';
     if (dom.targetSisaDashboard) dom.targetSisaDashboard.textContent = 'Sisa Rp ' + formatRupiah(sisa);
 
+    // Halaman Target
     if (dom.targetProgress2) dom.targetProgress2.style.width = progress + '%';
     if (dom.targetProgressText) dom.targetProgressText.textContent = progress.toFixed(1) + '%';
     if (dom.targetTerkumpul) dom.targetTerkumpul.textContent = 'Rp ' + formatRupiah(totalTabungan);
@@ -571,6 +591,9 @@ function closeSavingModal() {
     editingSavingId = null;
 }
 
+// ================================================================
+//  FORM SUBMIT TABUNGAN (PERBAIKAN DENGAN type="text")
+// ================================================================
 function handleSavingSubmit(e) {
     e.preventDefault();
 
@@ -585,6 +608,7 @@ function handleSavingSubmit(e) {
         return;
     }
 
+    // Ambil nilai, bersihkan dari semua karakter non-digit
     let rawNominal = nominalInput.value.trim();
     if (!rawNominal) {
         alert('Masukkan nominal tabungan.');
@@ -592,9 +616,16 @@ function handleSavingSubmit(e) {
         return;
     }
 
+    // Hanya ambil angka
     const cleanNominal = rawNominal.replace(/[^0-9]/g, '');
-    const nominal = parseFloat(cleanNominal);
+    if (!cleanNominal) {
+        alert('Masukkan nominal tabungan yang valid (hanya angka).');
+        nominalInput.value = '';
+        nominalInput.focus();
+        return;
+    }
 
+    const nominal = parseInt(cleanNominal, 10);
     if (isNaN(nominal) || nominal <= 0) {
         alert('Masukkan nominal tabungan yang valid (angka positif). Contoh: 100000');
         nominalInput.value = '';
@@ -611,6 +642,7 @@ function handleSavingSubmit(e) {
 
     const catatan = catatanInput?.value?.trim() || '';
 
+    // Simpan atau update
     if (editingSavingId) {
         const idx = target.savings.findIndex(s => String(s.id) === String(editingSavingId));
         if (idx === -1) {
@@ -631,6 +663,7 @@ function handleSavingSubmit(e) {
     closeSavingModal();
     renderAll();
 
+    // Cek target tercapai
     const total = getTotalTabungan();
     const targetNominal = Number(target.nominal) || 0;
     if (total >= targetNominal && targetNominal > 0) {
@@ -674,14 +707,12 @@ function renderKategoriChart() {
                     Belum ada pengeluaran bulan ini
                 </div>
             `;
-            // Sembunyikan canvas
             canvas.style.display = 'none';
         }
         if (dom.kategoriTeratas) dom.kategoriTeratas.textContent = '—';
         return;
     }
 
-    // Tampilkan canvas
     canvas.style.display = 'block';
 
     // Kelompokkan data
