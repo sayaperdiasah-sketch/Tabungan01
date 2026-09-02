@@ -606,51 +606,115 @@ function handleSavingSubmit(e) {
     }
 }
 
+300);
+    }
+}
+
 // ================================================================
-//  KATEGORI CHART
+//  KATEGORI CHART (PERBAIKAN)
 // ================================================================
 function renderKategoriChart() {
-    if (!dom.kategoriChart) return;
+    const container = dom.kategoriChart;
+    if (!container) {
+        console.warn('Element #kategoriChart tidak ditemukan');
+        return;
+    }
+
     const now = new Date();
     const bulanIni = now.getMonth();
     const tahunIni = now.getFullYear();
 
-    const kategoriMap = {};
-    let total = 0;
-    transactions.forEach(t => {
+    // Filter transaksi pengeluaran bulan ini
+    const pengeluaranBulanIni = transactions.filter(t => {
+        if (t.jenis !== 'pengeluaran') return false;
         const d = new Date(t.tanggal + 'T00:00:00');
-        if (d.getMonth() === bulanIni && d.getFullYear() === tahunIni && t.jenis === 'pengeluaran') {
-            const nominal = Number(t.nominal) || 0;
-            kategoriMap[t.kategori] = (kategoriMap[t.kategori] || 0) + nominal;
-            total += nominal;
-        }
+        if (isNaN(d.getTime())) return false;
+        return d.getMonth() === bulanIni && d.getFullYear() === tahunIni;
     });
 
-    const entries = Object.entries(kategoriMap).sort((a, b) => b[1] - a[1]);
-    dom.kategoriChart.innerHTML = '';
-    if (entries.length === 0) {
-        dom.kategoriChart.innerHTML = `<div style="color:var(--text-secondary);font-size:14px;padding:8px 0;">Belum ada pengeluaran bulan ini</div>`;
+    console.log('📊 Pengeluaran bulan ini:', pengeluaranBulanIni.length, 'transaksi');
+
+    if (pengeluaranBulanIni.length === 0) {
+        container.innerHTML = `
+            <div style="color:var(--text-secondary);font-size:14px;padding:8px 0;text-align:center;">
+                <i class="fas fa-chart-pie" style="display:block;font-size:28px;margin-bottom:8px;opacity:0.3;"></i>
+                Belum ada pengeluaran bulan ini
+            </div>
+        `;
         if (dom.kategoriTeratas) dom.kategoriTeratas.textContent = '—';
         return;
     }
+
+    // Kelompokkan berdasarkan kategori
+    const kategoriMap = {};
+    let total = 0;
+    pengeluaranBulanIni.forEach(t => {
+        const nominal = Number(t.nominal) || 0;
+        const kategori = t.kategori || 'Lainnya';
+        kategoriMap[kategori] = (kategoriMap[kategori] || 0) + nominal;
+        total += nominal;
+    });
+
+    const entries = Object.entries(kategoriMap).sort((a, b) => b[1] - a[1]);
+    console.log('📊 Kategori:', entries);
+
+    // Kosongkan container
+    container.innerHTML = '';
+
+    // Tampilkan kategori teratas
     if (dom.kategoriTeratas) {
-        dom.kategoriTeratas.textContent = `${entries[0][0]} (${Math.round((entries[0][1]/total)*100)}%)`;
+        const top = entries[0];
+        dom.kategoriTeratas.textContent = `${top[0]} (${Math.round((top[1]/total)*100)}%)`;
     }
 
-    const colors = ['#6c5ce7','#00d4aa','#ff6b6b','#ffc107','#4ecdc4','#a29bfe'];
+    // Warna untuk bar
+    const colors = ['#6c5ce7', '#00d4aa', '#ff6b6b', '#ffc107', '#4ecdc4', '#a29bfe', '#f783ac', '#845ef7'];
+
+    // Tampilkan maksimal 6 kategori
     entries.slice(0, 6).forEach(([kategori, nominal], index) => {
         const persen = (nominal / total) * 100;
         const item = document.createElement('div');
         item.className = 'kategori-item';
-        item.innerHTML = `
-            <span>${escapeHtml(kategori)}</span>
-            <div class="bar" style="width:${Math.max(10, persen * 1.2)}px; background:${colors[index % colors.length]};"></div>
-            <span class="persen">${persen.toFixed(0)}%</span>
+        item.style.cssText = `
+            display:flex;
+            align-items:center;
+            gap:8px;
+            background:rgba(255,255,255,0.04);
+            padding:4px 14px;
+            border-radius:30px;
+            font-size:12px;
         `;
-        dom.kategoriChart.appendChild(item);
+        item.innerHTML = `
+            <span style="font-weight:500;">${escapeHtml(kategori)}</span>
+            <div style="width:${Math.max(20, persen * 1.5)}px;height:6px;border-radius:10px;background:${colors[index % colors.length]};"></div>
+            <span style="color:var(--text-secondary);font-size:11px;">${persen.toFixed(0)}%</span>
+        `;
+        container.appendChild(item);
     });
-}
 
+    // Jika ada lebih dari 6 kategori, tambahkan "lainnya"
+    if (entries.length > 6) {
+        const sisa = entries.slice(6).reduce((sum, item) => sum + item[1], 0);
+        const persen = (sisa / total) * 100;
+        const item = document.createElement('div');
+        item.className = 'kategori-item';
+        item.style.cssText = `
+            display:flex;
+            align-items:center;
+            gap:8px;
+            background:rgba(255,255,255,0.04);
+            padding:4px 14px;
+            border-radius:30px;
+            font-size:12px;
+        `;
+        item.innerHTML = `
+            <span style="font-weight:500;">Lainnya</span>
+            <div style="width:${Math.max(20, persen * 1.5)}px;height:6px;border-radius:10px;background:#868e96;"></div>
+            <span style="color:var(--text-secondary);font-size:11px;">${persen.toFixed(0)}%</span>
+        `;
+        container.appendChild(item);
+    }
+}
 // ================================================================
 //  LAPORAN
 // ================================================================
