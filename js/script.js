@@ -1005,3 +1005,33 @@ function init() {
 }
 
 document.addEventListener('DOMContentLoaded', init);
+// ================================================================
+//  FALLBACK: PASTIKAN TOMBOL TAMBAH BERFUNGSI
+// ================================================================
+
+// Tunggu sampai DOM siap
+document.addEventListener('DOMContentLoaded', function() {
+    // Cari semua tombol tambah
+    const tambahBtns = document.querySelectorAll('#btnTambahTransaksiTop, #btnTambahDariPage, .topbar-add-btn');
+    tambahBtns.forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            // Buka modal transaksi
+            const modal = document.getElementById('modalTransaksi');
+            if (modal) {
+                modal.style.display = 'flex';
+                // Set judul dan reset form
+                document.getElementById('modalTitle').textContent = 'Tambah Transaksi';
+                document.getElementById('fKeterangan').value = '';
+                document.getElementById('fNominal').value = '';
+                document.getElementById('fKategori').value = 'makanan';
+                document.getElementById('fTanggal').value = new Date().toISOString().split('T')[0];
+                document.querySelector('input[name="jenis"][value="pemasukan"]').checked = true;
+                // Reset editingId
+                window.editingId = null;
+            } else {
+                alert('Modal transaksi tidak ditemukan.');
+            }
+        });
+    });
+});
