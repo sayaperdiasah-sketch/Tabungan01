@@ -1,10 +1,6 @@
 // ================================================================
 //  KEUANGAN PRIBADI — SCRIPT.JS
 //  VERSI FINAL — SEMUA FITUR BERFUNGSI
-//  - Input tabungan pakai type="text" + parsing angka
-//  - Chart.js (pie chart & bar chart)
-//  - Filter kategori & jenis transaksi
-//  - CRUD transaksi & tabungan
 // ================================================================
 
 // STATE
