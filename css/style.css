@@ -2625,3 +2625,26 @@ textarea:focus-visible {
         transition-duration: 0.01ms !important;
     }
 }
+/* ============================================================
+   SCROLL HORIZONTAL UNTUK DAFTAR TRANSAKSI
+   ============================================================ */
+
+.all-transaksi-list {
+    overflow-x: auto;
+    width: 100%;
+    padding: 10px 0;
+}
+
+.all-transaksi-list .row {
+    min-width: 600px; /* biar kolom tetap proporsional */
+}
+
+/* Untuk dashboard history juga pastikan bisa scroll */
+.history-table-wrap {
+    overflow-x: auto;
+    width: 100%;
+}
+
+.history-table {
+    min-width: 600px;
+}
