@@ -527,31 +527,82 @@ function closeSavingModal() {
     editingSavingId = null;
 }
 
+// ================================================================
+//  FORM SUBMIT TABUNGAN (PERBAIKAN)
+// ================================================================
 function handleSavingSubmit(e) {
     e.preventDefault();
+
     if (!Array.isArray(target.savings)) target.savings = [];
 
-    const nominal = parseFloat(dom.fTabunganNominal?.value);
-    const tanggal = dom.fTabunganTanggal?.value;
-    const catatan = dom.fTabunganCatatan?.value?.trim() || '';
+    // Ambil nilai dari input
+    const nominalInput = dom.fTabunganNominal;
+    const tanggalInput = dom.fTabunganTanggal;
+    const catatanInput = dom.fTabunganCatatan;
 
-    if (!Number.isFinite(nominal) || nominal <= 0) { alert('Masukkan nominal tabungan valid'); return; }
-    if (!tanggal) { alert('Pilih tanggal'); return; }
+    // Validasi elemen ada
+    if (!nominalInput || !tanggalInput) {
+        alert('Form tabungan tidak lengkap. Refresh halaman.');
+        return;
+    }
 
+    // Ambil nilai sebagai string, lalu bersihkan
+    let rawNominal = nominalInput.value.trim();
+    if (!rawNominal) {
+        alert('Masukkan nominal tabungan.');
+        nominalInput.focus();
+        return;
+    }
+
+    // Konversi ke angka (hapus titik, koma, spasi)
+    const cleanNominal = rawNominal.replace(/[^0-9]/g, '');
+    const nominal = parseFloat(cleanNominal);
+
+    // Validasi angka
+    if (isNaN(nominal) || nominal <= 0) {
+        alert('Masukkan nominal tabungan yang valid (angka positif). Contoh: 100000');
+        nominalInput.value = '';
+        nominalInput.focus();
+        return;
+    }
+
+    const tanggal = tanggalInput.value;
+    if (!tanggal) {
+        alert('Pilih tanggal tabungan.');
+        tanggalInput.focus();
+        return;
+    }
+
+    const catatan = catatanInput?.value?.trim() || '';
+
+    // Simpan atau update
     if (editingSavingId) {
         const idx = target.savings.findIndex(s => String(s.id) === String(editingSavingId));
-        if (idx === -1) { alert('Setoran tidak ditemukan'); return; }
+        if (idx === -1) {
+            alert('Setoran tidak ditemukan.');
+            return;
+        }
         target.savings[idx] = { ...target.savings[idx], nominal, tanggal, catatan };
     } else {
-        target.savings.push({ id: createId('saving'), nominal, tanggal, catatan });
+        target.savings.push({
+            id: createId('saving'),
+            nominal,
+            tanggal,
+            catatan
+        });
     }
+
     saveData();
     closeSavingModal();
     renderAll();
 
+    // Cek target tercapai
     const total = getTotalTabungan();
-    if (total >= (Number(target.nominal) || 0) && Number(target.nominal) > 0) {
-        setTimeout(() => alert('🎉 Selamat! Target tabungan kamu sudah tercapai!'), 300);
+    const targetNominal = Number(target.nominal) || 0;
+    if (total >= targetNominal && targetNominal > 0) {
+        setTimeout(() => {
+            alert('🎉 Selamat! Target tabungan kamu sudah tercapai!');
+        }, 300);
     }
 }
 
@@ -695,7 +746,7 @@ function updatePage() {
 }
 
 // ================================================================
-//  BIND EVENTS (PERBAIKAN)
+//  BIND EVENTS
 // ================================================================
 function bindEvents() {
     // NAV
@@ -731,8 +782,8 @@ function bindEvents() {
         });
     }
 
-    // ---- TOMBOL TAMBAH (PERBAIKAN) ----
-    const tambahBtns = document.querySelectorAll('#btnTambahTransaksiTop, #btnTambahDariPage, .topbar-add-btn, .btn-add[data-action="tambah"]');
+    // TOMBOL TAMBAH
+    const tambahBtns = document.querySelectorAll('#btnTambahTransaksiTop, #btnTambahDariPage, .topbar-add-btn');
     tambahBtns.forEach(btn => {
         btn.addEventListener('click', function(e) {
             e.preventDefault();
@@ -823,7 +874,7 @@ function bindEvents() {
         }
     });
 
-    // VIEW ALL (ke halaman transaksi)
+    // VIEW ALL
     document.querySelectorAll('[data-page-link="transaksi"]').forEach(btn => {
         btn.addEventListener('click', function(e) {
             e.preventDefault();
