@@ -274,7 +274,15 @@
                             <label for="targetNominalInput">Nominal Target</label>
                             <div class="input-money">
                                 <span>Rp</span>
-                                <input type="number" id="targetNominalInput" placeholder="10000000" min="1" step="1000" />
+                                <!-- PERBAIKAN: type="number" → type="text" -->
+                                <input
+                                    type="text"
+                                    id="targetNominalInput"
+                                    placeholder="10000000"
+                                    inputmode="numeric"
+                                    pattern="[0-9]*"
+                                    autocomplete="off"
+                                />
                             </div>
                         </div>
                         <button class="btn-add" id="btnSimpanTarget" type="button"><i class="fas fa-save"></i> Simpan Target</button>
@@ -396,7 +404,16 @@
                 <label for="fNominal">Nominal</label>
                 <div class="input-money">
                     <span>Rp</span>
-                    <input type="number" id="fNominal" placeholder="0" min="1" step="1000" required />
+                    <!-- PERBAIKAN: type="number" → type="text" -->
+                    <input
+                        type="text"
+                        id="fNominal"
+                        placeholder="0"
+                        inputmode="numeric"
+                        pattern="[0-9]*"
+                        autocomplete="off"
+                        required
+                    />
                 </div>
             </div>
             <div class="form-group">
