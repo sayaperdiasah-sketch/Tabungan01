@@ -1,6 +1,6 @@
 // ================================================================
 //  KEUANGAN PRIBADI — VERSI RINGAN (Tanpa Chart.js)
-//  PERBAIKAN: input real-time cleaner + parsing angka
+//  PERBAIKAN: normalisasi kategori (lowercase) + input cleaner
 // ================================================================
 
 // STATE
@@ -155,23 +155,18 @@ function createId(prefix) {
 //  REAL-TIME INPUT CLEANER
 // ================================================================
 function setupInputCleaner() {
-    // Bersihkan input nominal transaksi
     const fNominal = document.getElementById('fNominal');
     if (fNominal) {
         fNominal.addEventListener('input', function() {
             this.value = this.value.replace(/[^0-9]/g, '');
         });
     }
-
-    // Bersihkan input nominal target
     const targetNominal = document.getElementById('targetNominalInput');
     if (targetNominal) {
         targetNominal.addEventListener('input', function() {
             this.value = this.value.replace(/[^0-9]/g, '');
         });
     }
-
-    // Bersihkan input nominal tabungan
     const tabunganNominal = document.getElementById('tabunganNominal');
     if (tabunganNominal) {
         tabunganNominal.addEventListener('input', function() {
@@ -230,8 +225,11 @@ function renderHistory() {
 
     let filtered = [...transactions];
     if (dom.filterKategori && dom.filterKategori.value !== 'semua') {
-        const filterVal = dom.filterKategori.value;
-        filtered = filtered.filter(t => t.kategori && t.kategori.toLowerCase() === filterVal.toLowerCase());
+        const filterVal = dom.filterKategori.value.toLowerCase();
+        filtered = filtered.filter(t => {
+            const cat = (t.kategori || '').toLowerCase();
+            return cat === filterVal;
+        });
     }
     filtered.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
 
@@ -248,10 +246,11 @@ function renderHistory() {
         const sign = isPemasukan ? '+' : '−';
         const color = isPemasukan ? 'var(--success)' : 'var(--danger)';
         const id = escapeHtml(String(t.id));
+        const displayKategori = (t.kategori || 'Lainnya').charAt(0).toUpperCase() + (t.kategori || 'lainnya').slice(1);
         html += `
             <tr data-id="${id}">
                 <td><strong>${escapeHtml(t.keterangan)}</strong></td>
-                <td>${escapeHtml(t.kategori || 'Lainnya')}</td>
+                <td>${escapeHtml(displayKategori)}</td>
                 <td>${formatTanggal(t.tanggal)}</td>
                 <td style="color:${color};font-weight:700;">${sign} Rp${formatRupiah(t.nominal)}</td>
                 <td>
@@ -314,11 +313,12 @@ function renderAllTransactions() {
         const sign = isPemasukan ? '+' : '−';
         const color = isPemasukan ? 'var(--success)' : 'var(--danger)';
         const id = escapeHtml(String(t.id));
+        const displayKategori = (t.kategori || 'Lainnya').charAt(0).toUpperCase() + (t.kategori || 'lainnya').slice(1);
         html += `
             <div class="row" style="display:grid;grid-template-columns:2fr 1.2fr 1fr 1.2fr 0.6fr;padding:10px 0;border-bottom:1px solid var(--border);align-items:center;">
                 <span style="font-weight:500;">${escapeHtml(t.keterangan)}</span>
                 <span>${formatTanggal(t.tanggal)}</span>
-                <span>${escapeHtml(t.kategori || 'Lainnya')}</span>
+                <span>${escapeHtml(displayKategori)}</span>
                 <span style="color:${color};font-weight:700;">${sign} Rp${formatRupiah(t.nominal)}</span>
                 <span>
                     <button class="edit-btn-all" data-id="${id}" title="Edit" style="background:none;border:none;color:var(--text-secondary);cursor:pointer;padding:4px 6px;">
@@ -517,7 +517,7 @@ function closeModal() {
 }
 
 // ================================================================
-//  FORM SUBMIT TRANSAKSI (PERBAIKAN: type="text" + parsing)
+//  FORM SUBMIT TRANSAKSI (PERBAIKAN: simpan kategori lowercase)
 // ================================================================
 function handleFormSubmit(e) {
     e.preventDefault();
@@ -526,12 +526,13 @@ function handleFormSubmit(e) {
     const jenis = radio.value;
     const keterangan = dom.fKeterangan?.value?.trim() || '';
 
-    // PERBAIKAN: bersihkan input nominal (hapus semua karakter non-digit)
+    // PERBAIKAN: bersihkan input nominal
     const rawNominal = dom.fNominal?.value?.trim() || '';
     const cleanNominal = rawNominal.replace(/[^0-9]/g, '');
     const nominal = parseInt(cleanNominal, 10) || 0;
 
-    const kategori = dom.fKategori?.value || 'lainnya';
+    // PERBAIKAN: simpan kategori dalam huruf kecil
+    const kategori = (dom.fKategori?.value || 'lainnya').toLowerCase();
     const tanggal = dom.fTanggal?.value;
 
     if (!keterangan) { alert('Masukkan keterangan'); return; }
@@ -579,7 +580,7 @@ function closeSavingModal() {
 }
 
 // ================================================================
-//  FORM SUBMIT TABUNGAN (SUDAH BENAR)
+//  FORM SUBMIT TABUNGAN
 // ================================================================
 function handleSavingSubmit(e) {
     e.preventDefault();
@@ -657,12 +658,10 @@ function handleSavingSubmit(e) {
 }
 
 // ================================================================
-//  SIMPAN TARGET (PERBAIKAN: type="text" + parsing)
+//  SIMPAN TARGET
 // ================================================================
 function saveTarget() {
     const nama = dom.targetNamaInput?.value?.trim() || 'Tabungan Darurat';
-
-    // PERBAIKAN: bersihkan input nominal target
     const rawNominal = dom.targetNominalInput?.value?.trim() || '';
     const cleanNominal = rawNominal.replace(/[^0-9]/g, '');
     const nominal = parseInt(cleanNominal, 10) || 0;
@@ -680,7 +679,7 @@ function saveTarget() {
 }
 
 // ================================================================
-//  KATEGORI CHART (CSS Bar)
+//  KATEGORI CHART (PERBAIKAN: normalisasi lowercase)
 // ================================================================
 function renderKategoriChart() {
     const container = dom.kategoriChart;
@@ -712,8 +711,9 @@ function renderKategoriChart() {
     let total = 0;
     pengeluaranBulanIni.forEach(t => {
         const nominal = Number(t.nominal) || 0;
-        const kategori = t.kategori || 'Lainnya';
-        kategoriMap[kategori] = (kategoriMap[kategori] || 0) + nominal;
+        // Normalisasi ke lowercase sebagai key
+        const key = (t.kategori || 'lainnya').toLowerCase();
+        kategoriMap[key] = (kategoriMap[key] || 0) + nominal;
         total += nominal;
     });
 
@@ -722,13 +722,15 @@ function renderKategoriChart() {
 
     if (dom.kategoriTeratas) {
         const top = entries[0];
-        dom.kategoriTeratas.textContent = `${top[0]} (${Math.round((top[1] / total) * 100)}%)`;
+        const displayName = top[0].charAt(0).toUpperCase() + top[0].slice(1);
+        dom.kategoriTeratas.textContent = `${displayName} (${Math.round((top[1] / total) * 100)}%)`;
     }
 
     const colors = ['#6c5ce7', '#00d4aa', '#ff6b6b', '#ffc107', '#4ecdc4', '#a29bfe'];
 
-    entries.slice(0, 6).forEach(([kategori, nominal], index) => {
+    entries.slice(0, 6).forEach(([key, nominal], index) => {
         const persen = (nominal / total) * 100;
+        const displayName = key.charAt(0).toUpperCase() + key.slice(1);
         const item = document.createElement('div');
         item.style.cssText = `
             display:flex;
@@ -740,7 +742,7 @@ function renderKategoriChart() {
             font-size:12px;
         `;
         item.innerHTML = `
-            <span style="font-weight:500;">${escapeHtml(kategori)}</span>
+            <span style="font-weight:500;">${escapeHtml(displayName)}</span>
             <div style="width:${Math.max(20, persen * 1.5)}px;height:6px;border-radius:10px;background:${colors[index % colors.length]};"></div>
             <span style="color:var(--text-secondary);font-size:11px;">${persen.toFixed(0)}%</span>
         `;
@@ -920,7 +922,7 @@ function bindEvents() {
     }
     if (dom.form) dom.form.addEventListener('submit', handleFormSubmit);
 
-    // FILTER KATEGORI
+    // FILTER KATEGORI (DASHBOARD)
     if (dom.filterKategori) {
         dom.filterKategori.addEventListener('change', function() {
             renderHistory();
@@ -992,11 +994,11 @@ function bindEvents() {
 //  INIT
 // ================================================================
 function init() {
-    console.log('🚀 Keuangan Dashboard starting... (Ringan - Fix Input)');
+    console.log('🚀 Keuangan Dashboard starting... (Normalisasi Kategori)');
     loadData();
     if (dom.fTanggal) dom.fTanggal.value = getLocalDateString();
     if (dom.fTabunganTanggal) dom.fTabunganTanggal.value = getLocalDateString();
-    setupInputCleaner(); // <-- PEMBERSIH REAL-TIME
+    setupInputCleaner();
     renderAll();
     bindEvents();
     console.log('✅ Keuangan Dashboard ready.');
