@@ -1,5 +1,6 @@
 // ================================================================
-//  KEUANGAN PRIBADI — SCRIPT.JS (FULL PERBAIKAN FILTER)
+//  KEUANGAN PRIBADI — SCRIPT.JS
+//  VERSI DENGAN CHART.JS (PIE & BAR CHART)
 // ================================================================
 
 // STATE
@@ -9,7 +10,11 @@ let editingId = null;
 let editingSavingId = null;
 let currentPage = 'dashboard';
 let filterKategori = 'semua';
-let filterMode = 'bulan'; // 'bulan' atau 'semua'
+let filterMode = 'bulan';
+
+// CHART INSTANCES
+let pieChartInstance = null;
+let barChartInstance = null;
 
 // DOM HELPER
 const $ = (s) => document.querySelector(s);
@@ -27,8 +32,8 @@ const dom = {
     historyTable: $('#historyTable'),
     jmlRiwayat: $('#jmlRiwayat'),
     filterKategori: $('#filterKategori'),
-    filterTransaksiPage: $('#filterTransaksiPage'),
     allTransaksiList: $('#allTransaksiList'),
+    filterTransaksiPage: $('#filterTransaksiPage'),
 
     targetNominal: $('#targetNominal'),
     targetDesc: $('#targetDesc'),
@@ -45,9 +50,12 @@ const dom = {
     targetPageNama: $('#targetPageNama'),
     targetPageStatus: $('#targetPageStatus'),
     targetNamaDashboard: $('#targetNamaDashboard'),
+    targetSisaDashboard: $('#targetSisaDashboard'),
+    targetProgressDashboard: $('#targetProgressDashboard'),
 
     laporanBulanan: $('#laporanBulanan'),
     laporanRingkasan: $('#laporanRingkasan'),
+    laporanLabelBulan: $('#laporanLabelBulan'),
 
     modal: $('#modalTransaksi'),
     modalTitle: $('#modalTitle'),
@@ -66,9 +74,6 @@ const dom = {
     btnEditTarget: $('#btnEditTarget'),
     btnTambahTabungan: $('#btnTambahTabungan'),
 
-    btnFilterPeriod: $('#btnFilterPeriod'),
-    rangeText: $('#rangeText'),
-
     modalTabungan: $('#modalTabungan'),
     modalTabunganTitle: $('#tabunganModalTitle'),
     formTabungan: $('#formTabungan'),
@@ -81,8 +86,12 @@ const dom = {
     currentDate: $('#currentDate'),
     periodBtns: $$('.period-btn'),
     pageTitle: $('#pageTitle'),
-    kategoriTeratas: $('#kategoriTeratas'),
     kategoriChart: $('#kategoriChart'),
+    kategoriTeratas: $('#kategoriTeratas'),
+
+    // Canvas untuk chart
+    pieCanvas: document.getElementById('pieChart'),
+    barCanvas: document.getElementById('barChart'),
 };
 
 // ================================================================
@@ -154,7 +163,7 @@ function formatTanggal(dateStr) {
     if (!dateStr) return '-';
     const d = new Date(dateStr + 'T00:00:00');
     if (isNaN(d.getTime())) return '-';
-    const bulan = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+    const bulan = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
     return d.getDate() + ' ' + bulan[d.getMonth()] + ' ' + d.getFullYear();
 }
 
@@ -166,31 +175,6 @@ function escapeHtml(text) {
 
 function createId(prefix) {
     return prefix + '-' + Date.now() + '-' + Math.random().toString(36).substr(2, 6);
-}
-
-// ================================================================
-//  FUNGSI FILTER TRANSAKSI
-// ================================================================
-function filterTransactions(transactionsList, kategori, mode) {
-    let filtered = [...transactionsList];
-
-    // Filter kategori
-    if (kategori && kategori !== 'semua') {
-        filtered = filtered.filter(t => t.kategori === kategori);
-    }
-
-    // Filter periode
-    if (mode === 'bulan') {
-        const now = new Date();
-        const bulanIni = now.getMonth();
-        const tahunIni = now.getFullYear();
-        filtered = filtered.filter(t => {
-            const d = new Date(t.tanggal + 'T00:00:00');
-            return d.getMonth() === bulanIni && d.getFullYear() === tahunIni;
-        });
-    }
-
-    return filtered;
 }
 
 // ================================================================
@@ -236,19 +220,18 @@ function renderSaldo() {
 }
 
 // ================================================================
-//  RENDER HISTORY (DENGAN FILTER)
+//  RENDER HISTORY (DASHBOARD)
 // ================================================================
 function renderHistory() {
     if (!dom.historyTable) return;
 
-    // Ambil nilai filter dari dropdown
-    const kategoriFilter = dom.filterKategori ? dom.filterKategori.value : 'semua';
-    filterKategori = kategoriFilter;
+    let filtered = [...transactions];
 
-    // Terapkan filter
-    const filtered = filterTransactions(transactions, kategoriFilter, filterMode);
+    if (dom.filterKategori && dom.filterKategori.value !== 'semua') {
+        const filterVal = dom.filterKategori.value;
+        filtered = filtered.filter(t => t.kategori && t.kategori.toLowerCase() === filterVal.toLowerCase());
+    }
 
-    // Urutkan dari yang terbaru
     filtered.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
 
     if (dom.jmlRiwayat) dom.jmlRiwayat.textContent = filtered.length + ' transaksi';
@@ -259,7 +242,6 @@ function renderHistory() {
     }
 
     let html = '';
-    // Tampilkan maksimal 10 transaksi
     filtered.slice(0, 10).forEach(t => {
         const isPemasukan = t.jenis === 'pemasukan';
         const sign = isPemasukan ? '+' : '−';
@@ -267,13 +249,17 @@ function renderHistory() {
         const id = escapeHtml(String(t.id));
         html += `
             <tr data-id="${id}">
-                <td>${escapeHtml(t.keterangan)}</td>
-                <td>${escapeHtml(t.kategori)}</td>
+                <td><strong>${escapeHtml(t.keterangan)}</strong></td>
+                <td>${escapeHtml(t.kategori || 'Lainnya')}</td>
                 <td>${formatTanggal(t.tanggal)}</td>
                 <td style="color:${color};font-weight:700;">${sign} Rp${formatRupiah(t.nominal)}</td>
                 <td>
-                    <button class="edit-btn" data-id="${id}" title="Edit"><i class="fas fa-pen"></i></button>
-                    <button class="delete-btn" data-id="${id}" title="Hapus"><i class="fas fa-trash"></i></button>
+                    <button class="edit-btn" data-id="${id}" title="Edit" style="background:none;border:none;color:var(--text-secondary);cursor:pointer;padding:4px 6px;">
+                        <i class="fas fa-pen"></i>
+                    </button>
+                    <button class="delete-btn" data-id="${id}" title="Hapus" style="background:none;border:none;color:var(--text-secondary);cursor:pointer;padding:4px 6px;">
+                        <i class="fas fa-trash"></i>
+                    </button>
                 </td>
             </tr>
         `;
@@ -300,17 +286,13 @@ function renderHistory() {
 function renderAllTransactions() {
     if (!dom.allTransaksiList) return;
 
-    // Ambil filter dari halaman transaksi
-    const filterPage = dom.filterTransaksiPage ? dom.filterTransaksiPage.value : 'semua';
     let filtered = [...transactions];
 
-    if (filterPage === 'pemasukan') {
-        filtered = filtered.filter(t => t.jenis === 'pemasukan');
-    } else if (filterPage === 'pengeluaran') {
-        filtered = filtered.filter(t => t.jenis === 'pengeluaran');
+    if (dom.filterTransaksiPage && dom.filterTransaksiPage.value !== 'semua') {
+        const filterVal = dom.filterTransaksiPage.value;
+        filtered = filtered.filter(t => t.jenis === filterVal);
     }
 
-    // Urutkan dari yang terbaru
     filtered.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
 
     if (filtered.length === 0) {
@@ -319,26 +301,33 @@ function renderAllTransactions() {
     }
 
     let html = `
-        <div class="row header-row" style="display:grid;grid-template-columns:2fr 1.2fr 1fr 1.2fr;padding:10px 0;border-bottom:1px solid var(--border);color:var(--text-muted);font-size:11px;font-weight:800;">
-            <span>Keterangan</span><span>Tanggal</span><span>Kategori</span><span>Nominal</span>
+        <div class="row header-row" style="display:grid;grid-template-columns:2fr 1.2fr 1fr 1.2fr 0.6fr;padding:10px 0;border-bottom:2px solid var(--border);color:var(--text-muted);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">
+            <span>Keterangan</span>
+            <span>Tanggal</span>
+            <span>Kategori</span>
+            <span>Nominal</span>
+            <span>Aksi</span>
         </div>
     `;
+
     filtered.forEach(t => {
         const isPemasukan = t.jenis === 'pemasukan';
         const sign = isPemasukan ? '+' : '−';
         const color = isPemasukan ? 'var(--success)' : 'var(--danger)';
         const id = escapeHtml(String(t.id));
         html += `
-            <div class="row" style="display:grid;grid-template-columns:2fr 1.2fr 1fr 1.2fr;padding:10px 0;border-bottom:1px solid var(--border);align-items:center;">
-                <span>${escapeHtml(t.keterangan)}</span>
+            <div class="row" style="display:grid;grid-template-columns:2fr 1.2fr 1fr 1.2fr 0.6fr;padding:10px 0;border-bottom:1px solid var(--border);align-items:center;">
+                <span style="font-weight:500;">${escapeHtml(t.keterangan)}</span>
                 <span>${formatTanggal(t.tanggal)}</span>
-                <span>${escapeHtml(t.kategori)}</span>
-                <span style="display:flex;align-items:center;gap:8px;justify-content:space-between;">
-                    <span style="color:${color};font-weight:700;">${sign} Rp${formatRupiah(t.nominal)}</span>
-                    <span>
-                        <button class="edit-btn-all" data-id="${id}" title="Edit"><i class="fas fa-pen"></i></button>
-                        <button class="delete-btn-all" data-id="${id}" title="Hapus"><i class="fas fa-trash"></i></button>
-                    </span>
+                <span>${escapeHtml(t.kategori || 'Lainnya')}</span>
+                <span style="color:${color};font-weight:700;">${sign} Rp${formatRupiah(t.nominal)}</span>
+                <span>
+                    <button class="edit-btn-all" data-id="${id}" title="Edit" style="background:none;border:none;color:var(--text-secondary);cursor:pointer;padding:4px 6px;">
+                        <i class="fas fa-pen"></i>
+                    </button>
+                    <button class="delete-btn-all" data-id="${id}" title="Hapus" style="background:none;border:none;color:var(--text-secondary);cursor:pointer;padding:4px 6px;">
+                        <i class="fas fa-trash"></i>
+                    </button>
                 </span>
             </div>
         `;
@@ -397,6 +386,8 @@ function renderTarget() {
     if (dom.targetProgress) dom.targetProgress.style.width = progress + '%';
     if (dom.targetStatus) dom.targetStatus.textContent = progress.toFixed(1) + '%';
     if (dom.targetNamaDashboard) dom.targetNamaDashboard.textContent = target.nama || 'Tabungan Darurat';
+    if (dom.targetProgressDashboard) dom.targetProgressDashboard.textContent = progress.toFixed(1) + '%';
+    if (dom.targetSisaDashboard) dom.targetSisaDashboard.textContent = 'Sisa Rp ' + formatRupiah(sisa);
 
     if (dom.targetProgress2) dom.targetProgress2.style.width = progress + '%';
     if (dom.targetProgressText) dom.targetProgressText.textContent = progress.toFixed(1) + '%';
@@ -431,8 +422,8 @@ function renderTargetSavingHistory() {
 
     if (savings.length === 0) {
         container.innerHTML = `
-            <div class="empty-saving-state">
-                <i class="fas fa-piggy-bank"></i>
+            <div class="empty-saving-state" style="text-align:center;padding:40px 20px;color:var(--text-muted);">
+                <i class="fas fa-piggy-bank" style="font-size:32px;display:block;margin-bottom:12px;opacity:0.3;"></i>
                 <div>Belum ada setoran.<br>Mulai sisihkan uang untuk mencapai targetmu.</div>
             </div>
         `;
@@ -443,16 +434,22 @@ function renderTargetSavingHistory() {
     savings.forEach(s => {
         const id = escapeHtml(String(s.id));
         html += `
-            <div class="target-saving-item" data-id="${id}">
-                <div class="target-saving-icon"><i class="fas fa-piggy-bank"></i></div>
-                <div class="target-saving-info">
-                    <strong>${escapeHtml(s.catatan || 'Setoran tabungan')}</strong>
-                    <span>${formatTanggal(s.tanggal)}</span>
+            <div class="target-saving-item" data-id="${id}" style="display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;align-items:center;gap:14px;padding:14px 20px;border-bottom:1px solid var(--border);">
+                <div class="target-saving-icon" style="width:38px;height:38px;display:flex;align-items:center;justify-content:center;border-radius:10px;background:rgba(0,212,170,0.08);color:var(--success);">
+                    <i class="fas fa-piggy-bank"></i>
                 </div>
-                <div class="target-saving-amount">+Rp${formatRupiah(s.nominal)}</div>
-                <div class="target-saving-actions">
-                    <button class="saving-edit" data-id="${id}" title="Edit"><i class="fas fa-pen"></i></button>
-                    <button class="saving-delete" data-id="${id}" title="Hapus"><i class="fas fa-trash"></i></button>
+                <div class="target-saving-info" style="min-width:0;">
+                    <strong style="display:block;font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(s.catatan || 'Setoran tabungan')}</strong>
+                    <span style="font-size:10px;color:var(--text-muted);">${formatTanggal(s.tanggal)}</span>
+                </div>
+                <div class="target-saving-amount" style="font-weight:700;color:var(--success);font-size:13px;white-space:nowrap;">+Rp${formatRupiah(s.nominal)}</div>
+                <div class="target-saving-actions" style="display:flex;gap:4px;">
+                    <button class="saving-edit" data-id="${id}" title="Edit" style="background:none;border:none;color:var(--text-secondary);cursor:pointer;padding:4px 6px;border-radius:6px;">
+                        <i class="fas fa-pen"></i>
+                    </button>
+                    <button class="saving-delete" data-id="${id}" title="Hapus" style="background:none;border:none;color:var(--text-secondary);cursor:pointer;padding:4px 6px;border-radius:6px;">
+                        <i class="fas fa-trash"></i>
+                    </button>
                 </div>
             </div>
         `;
@@ -644,14 +641,11 @@ function handleSavingSubmit(e) {
 }
 
 // ================================================================
-//  KATEGORI CHART
+//  CHART: PIE CHART (KATEGORI PENGELUARAN)
 // ================================================================
 function renderKategoriChart() {
-    const container = dom.kategoriChart;
-    if (!container) {
-        console.warn('Element #kategoriChart tidak ditemukan');
-        return;
-    }
+    const canvas = dom.pieCanvas;
+    if (!canvas) return;
 
     const now = new Date();
     const bulanIni = now.getMonth();
@@ -664,17 +658,33 @@ function renderKategoriChart() {
         return d.getMonth() === bulanIni && d.getFullYear() === tahunIni;
     });
 
+    // Hapus chart sebelumnya
+    if (pieChartInstance) {
+        pieChartInstance.destroy();
+        pieChartInstance = null;
+    }
+
+    // Jika tidak ada data, tampilkan pesan
     if (pengeluaranBulanIni.length === 0) {
-        container.innerHTML = `
-            <div style="color:var(--text-secondary);font-size:14px;padding:8px 0;text-align:center;">
-                <i class="fas fa-chart-pie" style="display:block;font-size:28px;margin-bottom:8px;opacity:0.3;"></i>
-                Belum ada pengeluaran bulan ini
-            </div>
-        `;
+        const container = dom.kategoriChart;
+        if (container) {
+            container.innerHTML = `
+                <div style="color:var(--text-secondary);font-size:14px;padding:8px 0;text-align:center;">
+                    <i class="fas fa-chart-pie" style="display:block;font-size:28px;margin-bottom:8px;opacity:0.3;"></i>
+                    Belum ada pengeluaran bulan ini
+                </div>
+            `;
+            // Sembunyikan canvas
+            canvas.style.display = 'none';
+        }
         if (dom.kategoriTeratas) dom.kategoriTeratas.textContent = '—';
         return;
     }
 
+    // Tampilkan canvas
+    canvas.style.display = 'block';
+
+    // Kelompokkan data
     const kategoriMap = {};
     let total = 0;
     pengeluaranBulanIni.forEach(t => {
@@ -684,67 +694,60 @@ function renderKategoriChart() {
         total += nominal;
     });
 
-    const entries = Object.entries(kategoriMap).sort((a, b) => b[1] - a[1]);
+    const labels = Object.keys(kategoriMap);
+    const data = Object.values(kategoriMap);
+    const colors = [
+        '#6c5ce7', '#00d4aa', '#ff6b6b', '#ffc107',
+        '#4ecdc4', '#a29bfe', '#f783ac', '#845ef7',
+        '#20c997', '#e599f7'
+    ];
 
-    container.innerHTML = '';
-
+    // Update kategori teratas
     if (dom.kategoriTeratas) {
+        const entries = Object.entries(kategoriMap).sort((a, b) => b[1] - a[1]);
         const top = entries[0];
-        dom.kategoriTeratas.textContent = `${top[0]} (${Math.round((top[1]/total)*100)}%)`;
+        dom.kategoriTeratas.textContent = `${top[0]} (${Math.round((top[1] / total) * 100)}%)`;
     }
 
-    const colors = ['#6c5ce7', '#00d4aa', '#ff6b6b', '#ffc107', '#4ecdc4', '#a29bfe', '#f783ac', '#845ef7'];
-
-    entries.slice(0, 6).forEach(([kategori, nominal], index) => {
-        const persen = (nominal / total) * 100;
-        const item = document.createElement('div');
-        item.className = 'kategori-item';
-        item.style.cssText = `
-            display:flex;
-            align-items:center;
-            gap:8px;
-            background:rgba(255,255,255,0.04);
-            padding:4px 14px;
-            border-radius:30px;
-            font-size:12px;
-        `;
-        item.innerHTML = `
-            <span style="font-weight:500;">${escapeHtml(kategori)}</span>
-            <div style="width:${Math.max(20, persen * 1.5)}px;height:6px;border-radius:10px;background:${colors[index % colors.length]};"></div>
-            <span style="color:var(--text-secondary);font-size:11px;">${persen.toFixed(0)}%</span>
-        `;
-        container.appendChild(item);
+    // Buat chart baru
+    const ctx = canvas.getContext('2d');
+    pieChartInstance = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: data,
+                backgroundColor: colors.slice(0, labels.length),
+                borderColor: 'rgba(10, 14, 23, 0.8)',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        color: '#8a99ad',
+                        font: { size: 10 },
+                        boxWidth: 12,
+                        padding: 8
+                    }
+                }
+            }
+        }
     });
-
-    if (entries.length > 6) {
-        const sisa = entries.slice(6).reduce((sum, item) => sum + item[1], 0);
-        const persen = (sisa / total) * 100;
-        const item = document.createElement('div');
-        item.className = 'kategori-item';
-        item.style.cssText = `
-            display:flex;
-            align-items:center;
-            gap:8px;
-            background:rgba(255,255,255,0.04);
-            padding:4px 14px;
-            border-radius:30px;
-            font-size:12px;
-        `;
-        item.innerHTML = `
-            <span style="font-weight:500;">Lainnya</span>
-            <div style="width:${Math.max(20, persen * 1.5)}px;height:6px;border-radius:10px;background:#868e96;"></div>
-            <span style="color:var(--text-secondary);font-size:11px;">${persen.toFixed(0)}%</span>
-        `;
-        container.appendChild(item);
-    }
 }
 
 // ================================================================
-//  LAPORAN
+//  CHART: BAR CHART (LAPORAN BULANAN)
 // ================================================================
 function renderLaporan() {
-    if (!dom.laporanBulanan || !dom.laporanRingkasan) return;
-    const bulan = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+    const canvas = dom.barCanvas;
+    if (!canvas) return;
+
+    const bulan = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
     const tahunIni = new Date().getFullYear();
     const pemasukanBulan = new Array(12).fill(0);
     const pengeluaranBulan = new Array(12).fill(0);
@@ -759,25 +762,77 @@ function renderLaporan() {
         }
     });
 
-    const maxVal = Math.max(1, ...pemasukanBulan, ...pengeluaranBulan);
-    dom.laporanBulanan.innerHTML = '';
-    for (let i = 0; i < 12; i++) {
-        const p = (pemasukanBulan[i] / maxVal) * 160;
-        const q = (pengeluaranBulan[i] / maxVal) * 160;
-        const div = document.createElement('div');
-        div.style.cssText = 'flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;';
-        div.innerHTML = `
-            <div style="width:100%;display:flex;justify-content:center;gap:2px;align-items:flex-end;height:170px;">
-                <div style="width:30%;background:#00d4aa;border-radius:4px 4px 0 0;height:${p}px;min-height:2px;transition:0.3s;"></div>
-                <div style="width:30%;background:#ff6b6b;border-radius:4px 4px 0 0;height:${q}px;min-height:2px;transition:0.3s;"></div>
-            </div>
-            <span style="color:var(--text-secondary);font-size:9px;">${bulan[i]}</span>
-        `;
-        dom.laporanBulanan.appendChild(div);
+    // Update label bulan
+    if (dom.laporanLabelBulan) {
+        const now = new Date();
+        dom.laporanLabelBulan.textContent = bulan[now.getMonth()] + ' ' + now.getFullYear();
     }
 
-    const totalPem = pemasukanBulan.reduce((a,b) => a+b, 0);
-    const totalPeng = pengeluaranBulan.reduce((a,b) => a+b, 0);
+    // Hapus chart sebelumnya
+    if (barChartInstance) {
+        barChartInstance.destroy();
+        barChartInstance = null;
+    }
+
+    // Jika tidak ada data, tampilkan pesan
+    const totalPem = pemasukanBulan.reduce((a, b) => a + b, 0);
+    const totalPeng = pengeluaranBulan.reduce((a, b) => a + b, 0);
+    if (totalPem === 0 && totalPeng === 0) {
+        dom.laporanRingkasan.innerHTML = `<div style="color:var(--text-secondary);text-align:center;padding:20px;">Belum ada data transaksi tahun ini</div>`;
+        canvas.style.display = 'none';
+        return;
+    }
+
+    canvas.style.display = 'block';
+
+    // Buat bar chart
+    const ctx = canvas.getContext('2d');
+    barChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: bulan,
+            datasets: [
+                {
+                    label: 'Pemasukan',
+                    data: pemasukanBulan,
+                    backgroundColor: 'rgba(0, 212, 170, 0.7)',
+                    borderColor: '#00d4aa',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Pengeluaran',
+                    data: pengeluaranBulan,
+                    backgroundColor: 'rgba(255, 107, 107, 0.7)',
+                    borderColor: '#ff6b6b',
+                    borderWidth: 1
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#8a99ad',
+                        font: { size: 10 }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    ticks: { color: '#6a7f99', font: { size: 9 } },
+                    grid: { color: 'rgba(255,255,255,0.04)' }
+                },
+                y: {
+                    ticks: { color: '#6a7f99', font: { size: 9 } },
+                    grid: { color: 'rgba(255,255,255,0.04)' }
+                }
+            }
+        }
+    });
+
+    // Update ringkasan
     dom.laporanRingkasan.innerHTML = `
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
             <div style="background:rgba(0,212,170,0.06);padding:12px;border-radius:16px;">
@@ -823,9 +878,9 @@ function renderAll() {
     renderSaldo();
     renderHistory();
     renderTarget();
-    renderKategoriChart();
+    renderKategoriChart(); // pie chart
     renderAllTransactions();
-    renderLaporan();
+    renderLaporan(); // bar chart + ringkasan
     updatePage();
 }
 
@@ -951,9 +1006,11 @@ function bindEvents() {
             if (e.target === this) closeSavingModal();
         });
     }
-    if (dom.formTabungan) dom.formTabungan.addEventListener('submit', handleSavingSubmit);
+    if (dom.formTabungan) {
+        dom.formTabungan.addEventListener('submit', handleSavingSubmit);
+    }
 
-    // PERIOD BUTTONS
+    // PERIODE
     dom.periodBtns.forEach(btn => {
         btn.addEventListener('click', function() {
             dom.periodBtns.forEach(b => b.classList.remove('active'));
