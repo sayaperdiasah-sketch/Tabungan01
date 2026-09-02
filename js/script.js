@@ -1,6 +1,6 @@
 // ================================================================
 //  KEUANGAN PRIBADI — VERSI RINGAN (Tanpa Chart.js)
-//  PERBAIKAN: semua input nominal pakai type="text" + parsing angka
+//  PERBAIKAN: input real-time cleaner + parsing angka
 // ================================================================
 
 // STATE
@@ -149,6 +149,35 @@ function escapeHtml(text) {
 
 function createId(prefix) {
     return prefix + '-' + Date.now() + '-' + Math.random().toString(36).substr(2, 6);
+}
+
+// ================================================================
+//  REAL-TIME INPUT CLEANER
+// ================================================================
+function setupInputCleaner() {
+    // Bersihkan input nominal transaksi
+    const fNominal = document.getElementById('fNominal');
+    if (fNominal) {
+        fNominal.addEventListener('input', function() {
+            this.value = this.value.replace(/[^0-9]/g, '');
+        });
+    }
+
+    // Bersihkan input nominal target
+    const targetNominal = document.getElementById('targetNominalInput');
+    if (targetNominal) {
+        targetNominal.addEventListener('input', function() {
+            this.value = this.value.replace(/[^0-9]/g, '');
+        });
+    }
+
+    // Bersihkan input nominal tabungan
+    const tabunganNominal = document.getElementById('tabunganNominal');
+    if (tabunganNominal) {
+        tabunganNominal.addEventListener('input', function() {
+            this.value = this.value.replace(/[^0-9]/g, '');
+        });
+    }
 }
 
 // ================================================================
@@ -967,6 +996,7 @@ function init() {
     loadData();
     if (dom.fTanggal) dom.fTanggal.value = getLocalDateString();
     if (dom.fTabunganTanggal) dom.fTabunganTanggal.value = getLocalDateString();
+    setupInputCleaner(); // <-- PEMBERSIH REAL-TIME
     renderAll();
     bindEvents();
     console.log('✅ Keuangan Dashboard ready.');
