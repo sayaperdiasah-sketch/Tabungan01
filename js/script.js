@@ -1,6 +1,6 @@
 // ================================================================
 //  KEUANGAN PRIBADI — SCRIPT.JS
-//  VERSI FINAL — SEMUA FITUR BERFUNGSI
+//  VERSI FINAL DENGAN DEBUGGING
 // ================================================================
 
 // STATE
@@ -588,16 +588,21 @@ function closeSavingModal() {
 }
 
 // ================================================================
-//  FORM SUBMIT TABUNGAN (PERBAIKAN DENGAN type="text")
+//  FORM SUBMIT TABUNGAN (DENGAN DEBUGGING)
 // ================================================================
 function handleSavingSubmit(e) {
     e.preventDefault();
+    console.log('✅ handleSavingSubmit dipanggil!');
 
     if (!Array.isArray(target.savings)) target.savings = [];
 
-    const nominalInput = dom.fTabunganNominal;
-    const tanggalInput = dom.fTabunganTanggal;
-    const catatanInput = dom.fTabunganCatatan;
+    // Ambil elemen langsung dari DOM (fallback)
+    const nominalInput = document.getElementById('tabunganNominal');
+    const tanggalInput = document.getElementById('tabunganTanggal');
+    const catatanInput = document.getElementById('tabunganCatatan');
+
+    console.log('📝 nominalInput:', nominalInput);
+    console.log('📝 tanggalInput:', tanggalInput);
 
     if (!nominalInput || !tanggalInput) {
         alert('Form tabungan tidak lengkap. Refresh halaman.');
@@ -606,6 +611,8 @@ function handleSavingSubmit(e) {
 
     // Ambil nilai, bersihkan dari semua karakter non-digit
     let rawNominal = nominalInput.value.trim();
+    console.log('📝 rawNominal:', rawNominal);
+
     if (!rawNominal) {
         alert('Masukkan nominal tabungan.');
         nominalInput.focus();
@@ -614,6 +621,8 @@ function handleSavingSubmit(e) {
 
     // Hanya ambil angka
     const cleanNominal = rawNominal.replace(/[^0-9]/g, '');
+    console.log('📝 cleanNominal:', cleanNominal);
+
     if (!cleanNominal) {
         alert('Masukkan nominal tabungan yang valid (hanya angka).');
         nominalInput.value = '';
@@ -622,6 +631,8 @@ function handleSavingSubmit(e) {
     }
 
     const nominal = parseInt(cleanNominal, 10);
+    console.log('📝 nominal (angka):', nominal);
+
     if (isNaN(nominal) || nominal <= 0) {
         alert('Masukkan nominal tabungan yang valid (angka positif). Contoh: 100000');
         nominalInput.value = '';
@@ -1020,18 +1031,57 @@ function bindEvents() {
         });
     }
 
-    // TABUNGAN
-    if (dom.btnTambahTabungan) {
-        dom.btnTambahTabungan.addEventListener('click', function() {
+    // TABUNGAN - FALLBACK dengan ID langsung
+    const btnTambahTabungan = document.getElementById('btnTambahTabungan');
+    if (btnTambahTabungan) {
+        btnTambahTabungan.addEventListener('click', function(e) {
+            e.preventDefault();
             openSavingModal();
         });
     }
-    if (dom.modalTabunganClose) dom.modalTabunganClose.addEventListener('click', closeSavingModal);
-    if (dom.modalTabunganCancel) dom.modalTabunganCancel.addEventListener('click', closeSavingModal);
+    if (dom.btnTambahTabungan) {
+        dom.btnTambahTabungan.addEventListener('click', function(e) {
+            e.preventDefault();
+            openSavingModal();
+        });
+    }
+
+    // Modal tabungan - FALLBACK dengan ID langsung
+    const modalTabunganClose = document.getElementById('tabunganModalClose');
+    if (modalTabunganClose) {
+        modalTabunganClose.addEventListener('click', closeSavingModal);
+    }
+    if (dom.modalTabunganClose) {
+        dom.modalTabunganClose.addEventListener('click', closeSavingModal);
+    }
+
+    const modalTabunganCancel = document.getElementById('tabunganModalCancel');
+    if (modalTabunganCancel) {
+        modalTabunganCancel.addEventListener('click', closeSavingModal);
+    }
+    if (dom.modalTabunganCancel) {
+        dom.modalTabunganCancel.addEventListener('click', closeSavingModal);
+    }
+
+    const modalTabungan = document.getElementById('modalTabungan');
+    if (modalTabungan) {
+        modalTabungan.addEventListener('click', function(e) {
+            if (e.target === this) closeSavingModal();
+        });
+    }
     if (dom.modalTabungan) {
         dom.modalTabungan.addEventListener('click', function(e) {
             if (e.target === this) closeSavingModal();
         });
+    }
+
+    // Form tabungan - FALLBACK dengan ID langsung
+    const formTabungan = document.getElementById('formTabungan');
+    if (formTabungan) {
+        console.log('✅ formTabungan ditemukan, memasang event listener');
+        formTabungan.addEventListener('submit', handleSavingSubmit);
+    } else {
+        console.error('❌ formTabungan TIDAK ditemukan!');
     }
     if (dom.formTabungan) {
         dom.formTabungan.addEventListener('submit', handleSavingSubmit);
