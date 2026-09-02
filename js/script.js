@@ -684,4 +684,292 @@ function renderKategoriChart() {
     pengeluaranBulanIni.forEach(t => {
         const nominal = Number(t.nominal) || 0;
         const kategori = t.kategori || 'Lainnya';
-        kategoriMap[kategori] = (kategoriMap[k
+        kategoriMap[kategori] = (kategoriMap[kategori] || 0) + nominal;
+        total += nominal;
+    });
+
+    const entries = Object.entries(kategoriMap).sort((a, b) => b[1] - a[1]);
+    container.innerHTML = '';
+
+    if (dom.kategoriTeratas) {
+        const top = entries[0];
+        dom.kategoriTeratas.textContent = `${top[0]} (${Math.round((top[1] / total) * 100)}%)`;
+    }
+
+    const colors = ['#6c5ce7', '#00d4aa', '#ff6b6b', '#ffc107', '#4ecdc4', '#a29bfe'];
+
+    entries.slice(0, 6).forEach(([kategori, nominal], index) => {
+        const persen = (nominal / total) * 100;
+        const item = document.createElement('div');
+        item.style.cssText = `
+            display:flex;
+            align-items:center;
+            gap:8px;
+            background:rgba(255,255,255,0.04);
+            padding:4px 14px;
+            border-radius:30px;
+            font-size:12px;
+        `;
+        item.innerHTML = `
+            <span style="font-weight:500;">${escapeHtml(kategori)}</span>
+            <div style="width:${Math.max(20, persen * 1.5)}px;height:6px;border-radius:10px;background:${colors[index % colors.length]};"></div>
+            <span style="color:var(--text-secondary);font-size:11px;">${persen.toFixed(0)}%</span>
+        `;
+        container.appendChild(item);
+    });
+}
+
+// ================================================================
+//  LAPORAN (CSS Bar)
+// ================================================================
+function renderLaporan() {
+    const container = dom.laporanBulanan;
+    const ringkasan = dom.laporanRingkasan;
+    if (!container || !ringkasan) return;
+
+    const bulan = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+    const tahunIni = new Date().getFullYear();
+    const pemasukanBulan = new Array(12).fill(0);
+    const pengeluaranBulan = new Array(12).fill(0);
+
+    transactions.forEach(t => {
+        const d = new Date(t.tanggal + 'T00:00:00');
+        if (d.getFullYear() === tahunIni) {
+            const idx = d.getMonth();
+            const nominal = Number(t.nominal) || 0;
+            if (t.jenis === 'pemasukan') pemasukanBulan[idx] += nominal;
+            else pengeluaranBulan[idx] += nominal;
+        }
+    });
+
+    if (dom.laporanLabelBulan) {
+        const now = new Date();
+        dom.laporanLabelBulan.textContent = bulan[now.getMonth()] + ' ' + now.getFullYear();
+    }
+
+    const maxVal = Math.max(1, ...pemasukanBulan, ...pengeluaranBulan);
+    container.innerHTML = '';
+
+    for (let i = 0; i < 12; i++) {
+        const p = (pemasukanBulan[i] / maxVal) * 160;
+        const q = (pengeluaranBulan[i] / maxVal) * 160;
+        const div = document.createElement('div');
+        div.style.cssText = 'flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;';
+        div.innerHTML = `
+            <div style="width:100%;display:flex;justify-content:center;gap:2px;align-items:flex-end;height:170px;">
+                <div style="width:30%;background:#00d4aa;border-radius:4px 4px 0 0;height:${p}px;min-height:2px;transition:0.3s;"></div>
+                <div style="width:30%;background:#ff6b6b;border-radius:4px 4px 0 0;height:${q}px;min-height:2px;transition:0.3s;"></div>
+            </div>
+            <span style="color:var(--text-secondary);font-size:9px;">${bulan[i]}</span>
+        `;
+        container.appendChild(div);
+    }
+
+    const totalPem = pemasukanBulan.reduce((a, b) => a + b, 0);
+    const totalPeng = pengeluaranBulan.reduce((a, b) => a + b, 0);
+
+    ringkasan.innerHTML = `
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div style="background:rgba(0,212,170,0.06);padding:12px;border-radius:16px;">
+                <div style="color:var(--text-secondary);font-size:12px;">Total Pemasukan</div>
+                <div style="font-size:20px;font-weight:700;color:var(--success);">Rp ${formatRupiah(totalPem)}</div>
+            </div>
+            <div style="background:rgba(255,107,107,0.06);padding:12px;border-radius:16px;">
+                <div style="color:var(--text-secondary);font-size:12px;">Total Pengeluaran</div>
+                <div style="font-size:20px;font-weight:700;color:var(--danger);">Rp ${formatRupiah(totalPeng)}</div>
+            </div>
+        </div>
+        <div style="margin-top:12px;padding:12px;background:rgba(255,255,255,0.02);border-radius:16px;">
+            <div style="display:flex;justify-content:space-between;color:var(--text-secondary);font-size:13px;">
+                <span>Selisih</span>
+                <span style="font-weight:600;color:${totalPem >= totalPeng ? 'var(--success)' : 'var(--danger)'};">Rp ${formatRupiah(totalPem - totalPeng)}</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;color:var(--text-secondary);font-size:13px;margin-top:4px;">
+                <span>Transaksi</span>
+                <span>${transactions.length} transaksi</span>
+            </div>
+        </div>
+    `;
+}
+
+// ================================================================
+//  NAVIGASI
+// ================================================================
+function navigateTo(page) {
+    currentPage = page;
+    document.querySelectorAll('.page-section').forEach(el => el.style.display = 'none');
+    const target = document.getElementById('page-' + page);
+    if (target) target.style.display = 'block';
+
+    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+    const navItem = document.querySelector(`.nav-item[data-page="${page}"]`);
+    if (navItem) navItem.classList.add('active');
+
+    const titles = { dashboard: 'Dashboard', transaksi: 'Transaksi', target: 'Target', laporan: 'Laporan' };
+    if (dom.pageTitle) dom.pageTitle.textContent = titles[page] || 'Dashboard';
+}
+
+function renderAll() {
+    renderSaldo();
+    renderHistory();
+    renderTarget();
+    renderKategoriChart();
+    renderAllTransactions();
+    renderLaporan();
+    updatePage();
+}
+
+function updatePage() {
+    navigateTo(currentPage);
+}
+
+// ================================================================
+//  BIND EVENTS
+// ================================================================
+function bindEvents() {
+    // NAV
+    document.querySelectorAll('.nav-item').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const page = this.dataset.page;
+            if (page) navigateTo(page);
+        });
+    });
+
+    // MOBILE
+    const mobileBtn = document.getElementById('mobileMenuBtn');
+    const sidebar = document.getElementById('sidebar');
+    const sidebarClose = document.getElementById('sidebarClose');
+    const overlay = document.getElementById('sidebarOverlay');
+    if (mobileBtn) {
+        mobileBtn.addEventListener('click', function() {
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('active');
+        });
+    }
+    if (sidebarClose) {
+        sidebarClose.addEventListener('click', function() {
+            sidebar.classList.remove('open');
+            overlay.classList.remove('active');
+        });
+    }
+    if (overlay) {
+        overlay.addEventListener('click', function() {
+            sidebar.classList.remove('open');
+            overlay.classList.remove('active');
+        });
+    }
+
+    // TOMBOL TAMBAH
+    const tambahBtns = document.querySelectorAll('#btnTambahTransaksiTop, #btnTambahDariPage, .topbar-add-btn');
+    tambahBtns.forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            openModal();
+        });
+    });
+    if (dom.btnTambah) {
+        dom.btnTambah.addEventListener('click', function(e) {
+            e.preventDefault();
+            openModal();
+        });
+    }
+    if (dom.btnTambahPage) {
+        dom.btnTambahPage.addEventListener('click', function(e) {
+            e.preventDefault();
+            openModal();
+        });
+    }
+
+    // MODAL TRANSAKSI
+    if (dom.modalClose) dom.modalClose.addEventListener('click', closeModal);
+    if (dom.modalCancel) dom.modalCancel.addEventListener('click', closeModal);
+    if (dom.modal) {
+        dom.modal.addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+    }
+    if (dom.form) dom.form.addEventListener('submit', handleFormSubmit);
+
+    // FILTER KATEGORI
+    if (dom.filterKategori) {
+        dom.filterKategori.addEventListener('change', function() {
+            renderHistory();
+        });
+    }
+
+    // FILTER TRANSAKSI PAGE
+    if (dom.filterTransaksiPage) {
+        dom.filterTransaksiPage.addEventListener('change', function() {
+            renderAllTransactions();
+        });
+    }
+
+    // TARGET
+    if (dom.btnSimpanTarget) {
+        dom.btnSimpanTarget.addEventListener('click', saveTarget);
+    }
+    if (dom.btnEditTarget) {
+        dom.btnEditTarget.addEventListener('click', function() {
+            navigateTo('target');
+        });
+    }
+
+    // TABUNGAN
+    if (dom.btnTambahTabungan) {
+        dom.btnTambahTabungan.addEventListener('click', function() {
+            openSavingModal();
+        });
+    }
+    if (dom.modalTabunganClose) dom.modalTabunganClose.addEventListener('click', closeSavingModal);
+    if (dom.modalTabunganCancel) dom.modalTabunganCancel.addEventListener('click', closeSavingModal);
+    if (dom.modalTabungan) {
+        dom.modalTabungan.addEventListener('click', function(e) {
+            if (e.target === this) closeSavingModal();
+        });
+    }
+    if (dom.formTabungan) {
+        dom.formTabungan.addEventListener('submit', handleSavingSubmit);
+    }
+
+    // PERIODE
+    dom.periodBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            dom.periodBtns.forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            filterMode = this.dataset.period === 'bulan' ? 'bulan' : 'semua';
+            renderAll();
+        });
+    });
+
+    // ESCAPE
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            if (dom.modalTabungan && dom.modalTabungan.style.display === 'flex') closeSavingModal();
+            else if (dom.modal && dom.modal.style.display === 'flex') closeModal();
+        }
+    });
+
+    // VIEW ALL
+    document.querySelectorAll('[data-page-link="transaksi"]').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            navigateTo('transaksi');
+        });
+    });
+}
+
+// ================================================================
+//  INIT
+// ================================================================
+function init() {
+    console.log('🚀 Keuangan Dashboard starting... (Ringan - Fix Input)');
+    loadData();
+    if (dom.fTanggal) dom.fTanggal.value = getLocalDateString();
+    if (dom.fTabunganTanggal) dom.fTabunganTanggal.value = getLocalDateString();
+    renderAll();
+    bindEvents();
+    console.log('✅ Keuangan Dashboard ready.');
+}
+
+document.addEventListener('DOMContentLoaded', init);
