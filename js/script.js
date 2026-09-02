@@ -1,5 +1,5 @@
 // ================================================================
-//  KEUANGAN PRIBADI — SCRIPT.JS (FULL PERBAIKAN)
+//  KEUANGAN PRIBADI — SCRIPT.JS (FULL PERBAIKAN FILTER)
 // ================================================================
 
 // STATE
@@ -9,7 +9,7 @@ let editingId = null;
 let editingSavingId = null;
 let currentPage = 'dashboard';
 let filterKategori = 'semua';
-let filterMode = 'bulan';
+let filterMode = 'bulan'; // 'bulan' atau 'semua'
 
 // DOM HELPER
 const $ = (s) => document.querySelector(s);
@@ -27,6 +27,7 @@ const dom = {
     historyTable: $('#historyTable'),
     jmlRiwayat: $('#jmlRiwayat'),
     filterKategori: $('#filterKategori'),
+    filterTransaksiPage: $('#filterTransaksiPage'),
     allTransaksiList: $('#allTransaksiList'),
 
     targetNominal: $('#targetNominal'),
@@ -80,6 +81,8 @@ const dom = {
     currentDate: $('#currentDate'),
     periodBtns: $$('.period-btn'),
     pageTitle: $('#pageTitle'),
+    kategoriTeratas: $('#kategoriTeratas'),
+    kategoriChart: $('#kategoriChart'),
 };
 
 // ================================================================
@@ -166,6 +169,31 @@ function createId(prefix) {
 }
 
 // ================================================================
+//  FUNGSI FILTER TRANSAKSI
+// ================================================================
+function filterTransactions(transactionsList, kategori, mode) {
+    let filtered = [...transactionsList];
+
+    // Filter kategori
+    if (kategori && kategori !== 'semua') {
+        filtered = filtered.filter(t => t.kategori === kategori);
+    }
+
+    // Filter periode
+    if (mode === 'bulan') {
+        const now = new Date();
+        const bulanIni = now.getMonth();
+        const tahunIni = now.getFullYear();
+        filtered = filtered.filter(t => {
+            const d = new Date(t.tanggal + 'T00:00:00');
+            return d.getMonth() === bulanIni && d.getFullYear() === tahunIni;
+        });
+    }
+
+    return filtered;
+}
+
+// ================================================================
 //  RENDER SALDO
 // ================================================================
 function renderSaldo() {
@@ -208,15 +236,19 @@ function renderSaldo() {
 }
 
 // ================================================================
-//  RENDER HISTORY
+//  RENDER HISTORY (DENGAN FILTER)
 // ================================================================
 function renderHistory() {
     if (!dom.historyTable) return;
 
-    let filtered = [...transactions];
-    if (dom.filterKategori && dom.filterKategori.value !== 'semua') {
-        filtered = filtered.filter(t => t.kategori === dom.filterKategori.value);
-    }
+    // Ambil nilai filter dari dropdown
+    const kategoriFilter = dom.filterKategori ? dom.filterKategori.value : 'semua';
+    filterKategori = kategoriFilter;
+
+    // Terapkan filter
+    const filtered = filterTransactions(transactions, kategoriFilter, filterMode);
+
+    // Urutkan dari yang terbaru
     filtered.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
 
     if (dom.jmlRiwayat) dom.jmlRiwayat.textContent = filtered.length + ' transaksi';
@@ -227,6 +259,7 @@ function renderHistory() {
     }
 
     let html = '';
+    // Tampilkan maksimal 10 transaksi
     filtered.slice(0, 10).forEach(t => {
         const isPemasukan = t.jenis === 'pemasukan';
         const sign = isPemasukan ? '+' : '−';
@@ -262,39 +295,35 @@ function renderHistory() {
 }
 
 // ================================================================
-//  CRUD TRANSAKSI
-// ================================================================
-function deleteTransaction(id) {
-    const t = transactions.find(t => String(t.id) === String(id));
-    if (!t) { alert('Transaksi tidak ditemukan'); return; }
-    if (!confirm(`Hapus transaksi "${t.keterangan}"?\nData tidak dapat dikembalikan.`)) return;
-    transactions = transactions.filter(t => String(t.id) !== String(id));
-    saveData();
-    renderAll();
-}
-
-function editTransaction(id) {
-    const t = transactions.find(t => String(t.id) === String(id));
-    if (!t) { alert('Transaksi tidak ditemukan'); return; }
-    openModal(t);
-}
-
-// ================================================================
-//  RENDER ALL TRANSACTIONS
+//  RENDER ALL TRANSACTIONS (HALAMAN TRANSAKSI)
 // ================================================================
 function renderAllTransactions() {
     if (!dom.allTransaksiList) return;
-    if (transactions.length === 0) {
+
+    // Ambil filter dari halaman transaksi
+    const filterPage = dom.filterTransaksiPage ? dom.filterTransaksiPage.value : 'semua';
+    let filtered = [...transactions];
+
+    if (filterPage === 'pemasukan') {
+        filtered = filtered.filter(t => t.jenis === 'pemasukan');
+    } else if (filterPage === 'pengeluaran') {
+        filtered = filtered.filter(t => t.jenis === 'pengeluaran');
+    }
+
+    // Urutkan dari yang terbaru
+    filtered.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
+
+    if (filtered.length === 0) {
         dom.allTransaksiList.innerHTML = `<div class="empty-state"><i class="fas fa-receipt"></i>Belum ada transaksi</div>`;
         return;
     }
-    const sorted = [...transactions].sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
+
     let html = `
         <div class="row header-row" style="display:grid;grid-template-columns:2fr 1.2fr 1fr 1.2fr;padding:10px 0;border-bottom:1px solid var(--border);color:var(--text-muted);font-size:11px;font-weight:800;">
             <span>Keterangan</span><span>Tanggal</span><span>Kategori</span><span>Nominal</span>
         </div>
     `;
-    sorted.forEach(t => {
+    filtered.forEach(t => {
         const isPemasukan = t.jenis === 'pemasukan';
         const sign = isPemasukan ? '+' : '−';
         const color = isPemasukan ? 'var(--success)' : 'var(--danger)';
@@ -328,6 +357,24 @@ function renderAllTransactions() {
             deleteTransaction(this.dataset.id);
         });
     });
+}
+
+// ================================================================
+//  CRUD TRANSAKSI
+// ================================================================
+function deleteTransaction(id) {
+    const t = transactions.find(t => String(t.id) === String(id));
+    if (!t) { alert('Transaksi tidak ditemukan'); return; }
+    if (!confirm(`Hapus transaksi "${t.keterangan}"?\nData tidak dapat dikembalikan.`)) return;
+    transactions = transactions.filter(t => String(t.id) !== String(id));
+    saveData();
+    renderAll();
+}
+
+function editTransaction(id) {
+    const t = transactions.find(t => String(t.id) === String(id));
+    if (!t) { alert('Transaksi tidak ditemukan'); return; }
+    openModal(t);
 }
 
 // ================================================================
@@ -527,26 +574,20 @@ function closeSavingModal() {
     editingSavingId = null;
 }
 
-// ================================================================
-//  FORM SUBMIT TABUNGAN (PERBAIKAN)
-// ================================================================
 function handleSavingSubmit(e) {
     e.preventDefault();
 
     if (!Array.isArray(target.savings)) target.savings = [];
 
-    // Ambil nilai dari input
     const nominalInput = dom.fTabunganNominal;
     const tanggalInput = dom.fTabunganTanggal;
     const catatanInput = dom.fTabunganCatatan;
 
-    // Validasi elemen ada
     if (!nominalInput || !tanggalInput) {
         alert('Form tabungan tidak lengkap. Refresh halaman.');
         return;
     }
 
-    // Ambil nilai sebagai string, lalu bersihkan
     let rawNominal = nominalInput.value.trim();
     if (!rawNominal) {
         alert('Masukkan nominal tabungan.');
@@ -554,11 +595,9 @@ function handleSavingSubmit(e) {
         return;
     }
 
-    // Konversi ke angka (hapus titik, koma, spasi)
     const cleanNominal = rawNominal.replace(/[^0-9]/g, '');
     const nominal = parseFloat(cleanNominal);
 
-    // Validasi angka
     if (isNaN(nominal) || nominal <= 0) {
         alert('Masukkan nominal tabungan yang valid (angka positif). Contoh: 100000');
         nominalInput.value = '';
@@ -575,7 +614,6 @@ function handleSavingSubmit(e) {
 
     const catatan = catatanInput?.value?.trim() || '';
 
-    // Simpan atau update
     if (editingSavingId) {
         const idx = target.savings.findIndex(s => String(s.id) === String(editingSavingId));
         if (idx === -1) {
@@ -596,7 +634,6 @@ function handleSavingSubmit(e) {
     closeSavingModal();
     renderAll();
 
-    // Cek target tercapai
     const total = getTotalTabungan();
     const targetNominal = Number(target.nominal) || 0;
     if (total >= targetNominal && targetNominal > 0) {
@@ -606,12 +643,8 @@ function handleSavingSubmit(e) {
     }
 }
 
-300);
-    }
-}
-
 // ================================================================
-//  KATEGORI CHART (PERBAIKAN)
+//  KATEGORI CHART
 // ================================================================
 function renderKategoriChart() {
     const container = dom.kategoriChart;
@@ -624,15 +657,12 @@ function renderKategoriChart() {
     const bulanIni = now.getMonth();
     const tahunIni = now.getFullYear();
 
-    // Filter transaksi pengeluaran bulan ini
     const pengeluaranBulanIni = transactions.filter(t => {
         if (t.jenis !== 'pengeluaran') return false;
         const d = new Date(t.tanggal + 'T00:00:00');
         if (isNaN(d.getTime())) return false;
         return d.getMonth() === bulanIni && d.getFullYear() === tahunIni;
     });
-
-    console.log('📊 Pengeluaran bulan ini:', pengeluaranBulanIni.length, 'transaksi');
 
     if (pengeluaranBulanIni.length === 0) {
         container.innerHTML = `
@@ -645,7 +675,6 @@ function renderKategoriChart() {
         return;
     }
 
-    // Kelompokkan berdasarkan kategori
     const kategoriMap = {};
     let total = 0;
     pengeluaranBulanIni.forEach(t => {
@@ -656,21 +685,16 @@ function renderKategoriChart() {
     });
 
     const entries = Object.entries(kategoriMap).sort((a, b) => b[1] - a[1]);
-    console.log('📊 Kategori:', entries);
 
-    // Kosongkan container
     container.innerHTML = '';
 
-    // Tampilkan kategori teratas
     if (dom.kategoriTeratas) {
         const top = entries[0];
         dom.kategoriTeratas.textContent = `${top[0]} (${Math.round((top[1]/total)*100)}%)`;
     }
 
-    // Warna untuk bar
     const colors = ['#6c5ce7', '#00d4aa', '#ff6b6b', '#ffc107', '#4ecdc4', '#a29bfe', '#f783ac', '#845ef7'];
 
-    // Tampilkan maksimal 6 kategori
     entries.slice(0, 6).forEach(([kategori, nominal], index) => {
         const persen = (nominal / total) * 100;
         const item = document.createElement('div');
@@ -692,7 +716,6 @@ function renderKategoriChart() {
         container.appendChild(item);
     });
 
-    // Jika ada lebih dari 6 kategori, tambahkan "lainnya"
     if (entries.length > 6) {
         const sisa = entries.slice(6).reduce((sum, item) => sum + item[1], 0);
         const persen = (sisa / total) * 100;
@@ -715,6 +738,7 @@ function renderKategoriChart() {
         container.appendChild(item);
     }
 }
+
 // ================================================================
 //  LAPORAN
 // ================================================================
@@ -877,9 +901,18 @@ function bindEvents() {
     }
     if (dom.form) dom.form.addEventListener('submit', handleFormSubmit);
 
-    // FILTER
+    // FILTER KATEGORI (DASHBOARD)
     if (dom.filterKategori) {
-        dom.filterKategori.addEventListener('change', renderHistory);
+        dom.filterKategori.addEventListener('change', function() {
+            renderHistory();
+        });
+    }
+
+    // FILTER TRANSAKSI PAGE
+    if (dom.filterTransaksiPage) {
+        dom.filterTransaksiPage.addEventListener('change', function() {
+            renderAllTransactions();
+        });
     }
 
     // TARGET
@@ -920,7 +953,7 @@ function bindEvents() {
     }
     if (dom.formTabungan) dom.formTabungan.addEventListener('submit', handleSavingSubmit);
 
-    // PERIOD
+    // PERIOD BUTTONS
     dom.periodBtns.forEach(btn => {
         btn.addEventListener('click', function() {
             dom.periodBtns.forEach(b => b.classList.remove('active'));
