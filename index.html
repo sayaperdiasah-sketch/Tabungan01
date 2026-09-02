@@ -432,21 +432,55 @@
         </div>
     </div>
 
-    <div class="form-group">
-    <label for="tabunganNominal">Nominal Tabungan</label>
-    <div class="input-money">
-        <span>Rp</span>
-        <input
-            type="text"
-            id="tabunganNominal"
-            placeholder="0"
-            inputmode="numeric"
-            pattern="[0-9]*"
-            autocomplete="off"
-            required
-        />
+    <!-- MODAL TABUNGAN -->
+    <div class="modal-overlay" id="modalTabungan" aria-hidden="true">
+        <div class="modal-content saving-modal" role="dialog" aria-modal="true" aria-labelledby="tabunganModalTitle">
+            <div class="modal-header">
+                <div>
+                    <span class="modal-eyebrow">TARGET TABUNGAN</span>
+                    <h2 id="tabunganModalTitle">Tambah Tabungan</h2>
+                </div>
+                <button class="modal-close" id="tabunganModalClose" type="button"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="saving-modal-intro">
+                <div class="saving-modal-icon"><i class="fas fa-piggy-bank"></i></div>
+                <div>
+                    <strong>Catat setoranmu</strong>
+                    <p>Masukkan nominal yang kamu sisihkan untuk target <span id="tabunganTargetName">Tabungan Darurat</span>.</p>
+                </div>
+            </div>
+            <form id="formTabungan" novalidate>
+                <div class="form-group">
+                    <label for="tabunganNominal">Nominal Tabungan</label>
+                    <div class="input-money">
+                        <span>Rp</span>
+                        <input
+                            type="text"
+                            id="tabunganNominal"
+                            placeholder="0"
+                            inputmode="numeric"
+                            pattern="[0-9]*"
+                            autocomplete="off"
+                            required
+                        />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="tabunganTanggal">Tanggal</label>
+                    <input type="date" id="tabunganTanggal" required />
+                </div>
+                <div class="form-group">
+                    <label for="tabunganCatatan">Catatan <span class="optional-label">Opsional</span></label>
+                    <textarea id="tabunganCatatan" rows="3" placeholder="Contoh: Menabung dari uang lembur"></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn-cancel" id="tabunganModalCancel" type="button">Batal</button>
+                    <button class="btn-submit" type="submit"><i class="fas fa-piggy-bank"></i> Simpan Tabungan</button>
+                </div>
+            </form>
+        </div>
     </div>
-</div>
+
     <div class="toast-container" id="toastContainer"></div>
 
     <script src="js/script.js"></script>
