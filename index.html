@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
     <title>Keuangan Pribadi • Dashboard</title>
 
     <!-- Google Font: Inter -->
@@ -23,7 +22,6 @@
     <!-- CSS -->
     <link rel="stylesheet" href="css/style.css" />
 </head>
-
 <body>
 
     <!-- ============================================================
@@ -34,7 +32,7 @@
         <!-- ========================================================
              SIDEBAR
              ======================================================== -->
-        <aside class="sidebar">
+        <aside class="sidebar" id="sidebar">
 
             <div class="sidebar-header">
                 <div class="logo">
@@ -162,7 +160,7 @@
 
                     <button
                         class="topbar-add-btn"
-                        id="btnTambahTransaksiTop"
+                        id="btnTambahTransaksi"   <!-- ID ini di-cari JS -->
                         type="button"
                     >
                         <i class="fas fa-plus"></i>
@@ -204,18 +202,21 @@
 
                         <button
                             class="period-btn active"
+                            id="btnFilterPeriod"    <!-- ID ini di-cari JS -->
                             data-period="bulan"
                             type="button"
                         >
-                            Bulan Ini
+                            <i class="fas fa-calendar"></i>
+                            <span id="rangeText">Bulan Ini</span>
                         </button>
 
                         <button
                             class="period-btn"
-                            data-period="semua"
+                            id="btnFilterPeriodTahun"
+                            data-period="tahun"
                             type="button"
                         >
-                            Semua
+                            Tahun Ini
                         </button>
 
                     </div>
@@ -388,7 +389,7 @@
 
                             <div
                                 class="category-chart"
-                                id="kategoriChart"
+                                id="kategoriChart"   <!-- ID ini di-cari JS -->
                             >
                                 <!-- Diisi oleh JavaScript -->
                             </div>
@@ -1008,7 +1009,7 @@
 
                         <span
                             class="history-count"
-                            id="jmlTabungan"
+                            id="jmlSetoran"
                         >
                             0 setoran
                         </span>
@@ -1018,7 +1019,7 @@
 
                     <div
                         class="tabungan-history"
-                        id="tabunganHistory"
+                        id="targetSavingHistory"   <!-- ID ini di-cari JS -->
                     >
 
                         <!-- Diisi JavaScript -->
@@ -1516,7 +1517,7 @@
                         type="submit"
                     >
                         <i class="fas fa-piggy-bank"></i>
-                        Simpan Tabungan
+                        <span id="btnSimpanTabunganText">Simpan Tabungan</span>
                     </button>
 
                 </div>
@@ -1526,15 +1527,6 @@
         </div>
 
     </div>
-
-
-    <!-- ============================================================
-         CONFIRM / NOTIFICATION CONTAINER
-         ============================================================ -->
-    <div
-        class="toast-container"
-        id="toastContainer"
-    ></div>
 
 
     <!-- ============================================================
